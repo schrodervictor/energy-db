@@ -3,6 +3,7 @@ var expect = chai.expect;
 var energyDB = require('../lib/energy-db');
 var EnergyDB = energyDB.EnergyDB;
 var DynamoDB = require('aws-sdk').DynamoDB;
+var EnergyTable = require('../lib/energy-table').EnergyTable;
 
 var sinon = require('sinon');
 var sinonChai = require('sinon-chai');
@@ -78,7 +79,18 @@ describe('EnergyDB', function() {
                 );
                 done();
             });
+        });
+    });
 
+    describe('#table(tableName, callback)', function() {
+
+        it('should pass an EnergyTable instance to the callback', function(done) {
+            var db = new EnergyDB({}, dynamoDBMock);
+            db.table('Table-Name', function(err, table) {
+                if (err) return done(err);
+                expect(table).to.be.an.instanceOf(EnergyTable);
+                done();
+            });
         });
 
     });
