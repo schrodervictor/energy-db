@@ -12,6 +12,9 @@
     "url": "git://github.com/schrodervictor/energy-db.git"
   },
   "main": "./index",
+  "dependencies": {
+    "aws-sdk": "^2.2.0"
+  },
   "devDependencies": {
     "chai": "^3.2.0",
     "mocha": "^2.3.2"
