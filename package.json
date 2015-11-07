@@ -11,5 +11,12 @@
     "type": "git",
     "url": "git://github.com/schrodervictor/energy-db.git"
   },
-  "main": "./index"
+  "main": "./index",
+  "devDependencies": {
+    "chai": "^3.2.0",
+    "mocha": "^2.3.2"
+  },
+  "scripts": {
+    "test": "./node_modules/mocha/bin/mocha tests/*"
+  }
 }
