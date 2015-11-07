@@ -10,5 +10,6 @@
   "repository": {
     "type": "git",
     "url": "git://github.com/schrodervictor/energy-db.git"
-  }
+  },
+  "main": "./index"
 }
