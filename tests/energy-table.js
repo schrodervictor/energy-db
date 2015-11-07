@@ -1,4 +1,9 @@
-var expect = require('chai').expect;
+var chai = require('chai');
+var sinon = require('sinon');
+var sinonChai = require('sinon-chai');
+var expect = chai.expect;
+chai.use(sinonChai);
+
 var energyTable = require('../lib/energy-table');
 var EnergyTable = require('../lib/energy-table').EnergyTable;
 
@@ -17,6 +22,12 @@ var tableInfo = {
     }
 };
 
+var connectorMock = {
+    putItem: sinon.spy(function(item, callback) {
+        return callback();
+    })
+};
+
 var dbMock = {
     describeTable: function(tableName, callback) {
         if (tableName === tableInfo.Table.TableName) {
@@ -24,6 +35,9 @@ var dbMock = {
         } else {
             return callback(new Error());
         }
+    },
+    getConnector: function() {
+        return connectorMock;
     }
 };
 
@@ -183,6 +197,111 @@ describe('EnergyTable (class)', function() {
             };
             table.returnOldValues();
             expect(table.queryBase).to.deep.equal(queryBase);
+        });
+
+    });
+
+    describe('#putItem(item, callback)', function() {
+
+        var table;
+
+        beforeEach(function(done) {
+            table = new EnergyTable(dbMock, 'Sample-Table');
+            table.init(function(err, table) {
+                return done(err);
+            });
+        });
+
+        it('should redirect the call to putDynamoItem, with a transformed item', function(done) {
+            var item = {
+                'some-hash-key': 'some-value',
+                'some-range-key': 'some-range',
+                'other-key': 12345
+            };
+
+            var expectedDynamoItem = {
+                'some-hash-key': { S: 'some-value' },
+                'some-range-key': { S: 'some-range' },
+                'other-key': { N: '12345' }
+            };
+
+            var stub = sinon.stub(table, 'putDynamoItem', function(dynamoItem, callback) {
+                expect(dynamoItem).to.deep.equals(expectedDynamoItem);
+                callback();
+            });
+
+            table.putItem(item, function thisCallback(err, result) {
+                if (err) return done(err);
+                expect(stub).to.have.been.calledOnce;
+                expect(stub).to.have.been.calledWith(
+                    sinon.match(expectedDynamoItem),
+                    thisCallback
+                );
+                done();
+            });
+        });
+
+    });
+
+    describe('#putDynamoItem(dynamoItem, callback)', function() {
+
+        var table;
+
+        beforeEach(function(done) {
+            table = new EnergyTable(dbMock, 'Sample-Table');
+            table.init(function(err, table) {
+                return done(err);
+            });
+        });
+
+        afterEach(function() {
+            connectorMock.putItem.reset();
+        });
+
+        it('should call the DynamoDB API to put the item', function(done) {
+            var dynamoItem = {
+                'some-hash-key': { S: 'some-value' },
+                'some-range-key': { S: 'some-range' },
+                'other-key': { N: '12345' }
+            };
+
+            table.putDynamoItem(dynamoItem, function thisCallback(err, result) {
+                if (err) return done(err);
+                expect(connectorMock.putItem).to.have.been.calledOnce;
+                expect(connectorMock.putItem).to.have.been.calledWith(
+                    sinon.match({ Item: dynamoItem }),
+                    thisCallback
+                );
+                done();
+            });
+        });
+
+        it('should comply with the format expected by DynamoDB API', function(done) {
+
+            table.returnConsumedCapacity().returnOldValues();
+
+            var dynamoItem = {
+                'some-hash-key': { S: 'some-value' },
+                'some-range-key': { S: 'some-range' },
+                'other-key': { N: '12345' }
+            };
+
+            var expectedRequest = {
+                TableName: 'Sample-Table',
+                Item: dynamoItem,
+                ReturnConsumedCapacity: 'TOTAL',
+                ReturnValues: 'ALL_OLD',
+            };
+
+            table.putDynamoItem(dynamoItem, function thisCallback(err, result) {
+                if (err) return done(err);
+                expect(connectorMock.putItem).to.have.been.calledOnce;
+                expect(connectorMock.putItem).to.have.been.calledWith(
+                    sinon.match(expectedRequest),
+                    thisCallback
+                );
+                done();
+            });
         });
 
     });
