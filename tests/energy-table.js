@@ -95,4 +95,96 @@ describe('EnergyTable (class)', function() {
 
     });
 
+    describe('#addQueryParam(key, value)', function() {
+
+        var table;
+
+        beforeEach(function(done) {
+            table = new EnergyTable(dbMock, 'Sample-Table');
+            table.init(function(err, table) {
+                return done(err);
+            });
+        });
+
+        it('should add a new query param to the queryBase object', function() {
+            var queryBase = {
+                TableName: 'Sample-Table',
+                NewParam: 'new-value'
+            };
+            table.addQueryParam('NewParam', 'new-value');
+            expect(table.queryBase).to.deep.equal(queryBase);
+        });
+
+    });
+
+    describe('#addQueryParams(params)', function() {
+
+        var table;
+
+        beforeEach(function(done) {
+            table = new EnergyTable(dbMock, 'Sample-Table');
+            table.init(function(err, table) {
+                return done(err);
+            });
+        });
+
+        it('should add several params to the queryBase object', function() {
+            var queryBase = {
+                TableName: 'Sample-Table',
+                NewParam1: 'new-value-1',
+                NewParam2: 'new-value-2'
+            };
+            table.addQueryParams({
+                NewParam1: 'new-value-1',
+                NewParam2: 'new-value-2'
+            });
+            expect(table.queryBase).to.deep.equal(queryBase);
+        });
+
+    });
+
+    describe('#returnConsumedCapacity()', function() {
+
+        var table;
+
+        beforeEach(function(done) {
+            table = new EnergyTable(dbMock, 'Sample-Table');
+            table.init(function(err, table) {
+                return done(err);
+            });
+        });
+
+        it('should add the API flag to return the consumed capacity', function() {
+            var queryBase = {
+                TableName: 'Sample-Table',
+                ReturnConsumedCapacity: 'TOTAL'
+            };
+            table.returnConsumedCapacity();
+            expect(table.queryBase).to.deep.equal(queryBase);
+        });
+
+    });
+
+    describe('#returnOldValues()', function() {
+
+        var table;
+
+        beforeEach(function(done) {
+            table = new EnergyTable(dbMock, 'Sample-Table');
+            table.init(function(err, table) {
+                return done(err);
+            });
+        });
+
+        it('should add the API flag to return all the old values for after an update query', function() {
+            var queryBase = {
+                TableName: 'Sample-Table',
+                ReturnValues: 'ALL_OLD'
+            };
+            table.returnOldValues();
+            expect(table.queryBase).to.deep.equal(queryBase);
+        });
+
+    });
+
 });
