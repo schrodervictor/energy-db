@@ -50,4 +50,17 @@ describe('EnergyTable (class)', function() {
 
     });
 
+    describe('#initQueryBase()', function() {
+
+        it('should initialize the query base object', function() {
+            var table = new EnergyTable(dbMock, 'Sample-Table');
+            var expectedQueryBase = {
+                TableName: 'Sample-Table'
+            };
+            table.initQueryBase();
+            expect(table.queryBase).to.deep.equal(expectedQueryBase);
+        });
+
+    });
+
 });
