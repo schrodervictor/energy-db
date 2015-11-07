@@ -3,6 +3,8 @@ var energyDB = require('../lib/energy-db');
 var EnergyDB = energyDB.EnergyDB;
 var DynamoDB = require('aws-sdk').DynamoDB;
 
+var dynamoDBMock = {};
+
 describe('energy-db', function() {
     describe('#connect(settings, callback)', function() {
 
@@ -21,5 +23,18 @@ describe('energy-db', function() {
                 done();
             });
         });
+
+    });
+});
+
+describe('EnergyDB', function() {
+
+    describe('#getConnector()', function() {
+        it('should return the stored connector', function() {
+            var db = new EnergyDB({}, dynamoDBMock);
+            var connector = db.getConnector();
+            expect(connector).to.equals(dynamoDBMock);
+        });
+
     });
 });
