@@ -2,8 +2,6 @@ var expect = require('chai').expect;
 var energyTable = require('../lib/energy-table');
 var EnergyTable = require('../lib/energy-table').EnergyTable;
 
-var dbMock = {};
-
 var tableInfo = {
     Table: {
         TableName: 'Sample-Table',
@@ -16,6 +14,16 @@ var tableInfo = {
             { AttributeName: 'some-range-key', AttributeType: 'S' },
             { AttributeName: 'some-other-attr', AttributeType: 'N' }
         ]
+    }
+};
+
+var dbMock = {
+    describeTable: function(tableName, callback) {
+        if (tableName === tableInfo.Table.TableName) {
+            return callback(null, tableInfo);
+        } else {
+            return callback(new Error());
+        }
     }
 };
 
@@ -36,6 +44,30 @@ describe('EnergyTable (module)', function() {
 });
 
 describe('EnergyTable (class)', function() {
+
+    describe('EnergyTable(db, tableName) - constructor', function() {
+
+        it('should set the hashKey and rangeKey properties when constructing', function(done) {
+            energyTable.getInstance(dbMock, 'Sample-Table', function(err, table) {
+                if (err) done(err);
+                expect(table.hashKey).to.equals('some-hash-key');
+                expect(table.rangeKey).to.equals('some-range-key');
+                done();
+            });
+        });
+
+        it('should initialize the queryBase object', function(done) {
+            energyTable.getInstance(dbMock, 'Sample-Table', function(err, table) {
+                if (err) done(err);
+                var queryBase = {
+                    TableName: 'Sample-Table'
+                };
+                expect(table.queryBase).to.deep.equal(queryBase);
+                done();
+            });
+        });
+
+    });
 
     describe('#setKeySchema(tableInfo)', function() {
 
