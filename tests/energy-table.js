@@ -25,6 +25,12 @@ var tableInfo = {
 var connectorMock = {
     putItem: sinon.spy(function(item, callback) {
         return callback();
+    }),
+    query: sinon.spy(function(item, callback) {
+        return callback();
+    }),
+    scan: sinon.spy(function(item, callback) {
+        return callback();
     })
 };
 
@@ -372,6 +378,84 @@ describe('EnergyTable (class)', function() {
                 expect(connectorMock.putItem).to.have.been.calledOnce;
                 expect(connectorMock.putItem).to.have.been.calledWith(
                     sinon.match(expectedRequest),
+                    thisCallback
+                );
+                done();
+            });
+        });
+
+    });
+
+    describe('#query(doc, callback)', function() {
+
+        var table;
+
+        beforeEach(function(done) {
+            table = new EnergyTable(dbMock, 'Sample-Table');
+            table.init(function(err, table) {
+                return done(err);
+            });
+        });
+
+        afterEach(function() {
+            connectorMock.query.reset();
+            connectorMock.scan.reset();
+        });
+
+        it('should call the query method on the connector, when the hash key is specified', function(done) {
+            var doc = {
+                'some-hash-key': 'some-value',
+                'other-key': 12345
+            };
+
+            var expectedQuery = {
+                TableName: 'Sample-Table',
+                ExpressionAttributeNames: {
+                    '#k0': 'some-hash-key',
+                    '#k1': 'other-key'
+                },
+                ExpressionAttributeValues: {
+                    ':v0': {S: 'some-value'},
+                    ':v1': {N: '12345'}
+                },
+                KeyConditionExpression: '#k0 = :v0 AND #k1 = :v1'
+            }
+
+            table.query(doc, function thisCallback(err, result) {
+                if (err) return done(err);
+                expect(connectorMock.query).to.have.been.calledOnce;
+                expect(connectorMock.query).to.have.been.calledWith(
+                    sinon.match(expectedQuery),
+                    thisCallback
+                );
+                done();
+            });
+        });
+
+        it('should call the scan method on the connector, when the hash key is not specified', function(done) {
+            var doc = {
+                'a-key': 'some-string',
+                'other-key': 12345
+            };
+
+            var expectedQuery = {
+                TableName: 'Sample-Table',
+                ExpressionAttributeNames: {
+                    '#k0': 'a-key',
+                    '#k1': 'other-key'
+                },
+                ExpressionAttributeValues: {
+                    ':v0': {S: 'some-string'},
+                    ':v1': {N: '12345'}
+                },
+                FilterExpression: '#k0 = :v0 AND #k1 = :v1'
+            };
+
+            table.query(doc, function thisCallback(err, result) {
+                if (err) return done(err);
+                expect(connectorMock.scan).to.have.been.calledOnce;
+                expect(connectorMock.scan).to.have.been.calledWith(
+                    sinon.match(expectedQuery),
                     thisCallback
                 );
                 done();
