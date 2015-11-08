@@ -201,6 +201,80 @@ describe('EnergyTable (class)', function() {
 
     });
 
+    describe('#validateDynamoItem(dynamoItem, callback)', function() {
+
+        var table;
+
+        beforeEach(function(done) {
+            table = new EnergyTable(dbMock, 'Sample-Table');
+            table.init(function(err, table) {
+                return done(err);
+            });
+        });
+
+        it('should should return the same object when the hash and range keys are defined and have the correct type', function(done) {
+            var dynamoItem = {
+                'some-hash-key': { S: 'some-value' },
+                'some-range-key': { S: 'some-range' }
+            };
+
+            table.validateDynamoItem(dynamoItem, function(err, validDynamoItem) {
+                if (err) return done(err);
+                expect(validDynamoItem).to.equals(dynamoItem);
+                done();
+            });
+        });
+
+        it('should reject items without the hash key', function(done) {
+            var dynamoItem = {
+                'some-invalid-key': { S: 'some-value' },
+                'other-invalid-key': { N: '12345' }
+            };
+
+            table.validateDynamoItem(dynamoItem, function(err, validDynamoItem) {
+                expect(err).to.be.an.instanceOf(Error);
+                done();
+            });
+        });
+
+        it('should reject items without the range key', function(done) {
+            var dynamoItem = {
+                'some-hash-key': { S: 'some-value' },
+                'some-invalid-key': { N: '12345' }
+            };
+
+            table.validateDynamoItem(dynamoItem, function(err, validDynamoItem) {
+                expect(err).to.be.an.instanceOf(Error);
+                done();
+            });
+        });
+
+        it('should reject items when the hash key has the wrong type', function(done) {
+            var dynamoItem = {
+                'some-hash-key': { N: '12345' },
+                'some-range-key': { S: 'some-range' }
+            };
+
+            table.validateDynamoItem(dynamoItem, function(err, validDynamoItem) {
+                expect(err).to.be.an.instanceOf(Error);
+                done();
+            });
+        });
+
+        it('should reject items when the range key has the wrong type', function(done) {
+            var dynamoItem = {
+                'some-hash-key': { S: 'some-value' },
+                'some-range-key': { N: '12345' }
+            };
+
+            table.validateDynamoItem(dynamoItem, function(err, validDynamoItem) {
+                expect(err).to.be.an.instanceOf(Error);
+                done();
+            });
+        });
+
+    });
+
     describe('#putItem(item, callback)', function() {
 
         var table;
