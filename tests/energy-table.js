@@ -488,6 +488,110 @@ describe('EnergyTable (class)', function() {
             });
         });
 
+        it('should return the query results in the form of plain js objects (not dynamo)', function(done) {
+            var doc = {
+                'some-hash-key': 'some-value',
+                'other-key': 12345
+            };
+
+            var queryResults = {
+                Count: 1,
+                ScannedCount: 1,
+                Items: [
+                    {
+                        'some-hash-key': {S: 'some-value'},
+                        'other-key': {N: '12345'},
+                        'still-other-key': {M: {
+                            'key1': {N: '999'},
+                            'key2': {S: '444'}
+                        }}
+                    }
+                ]
+            };
+
+            var expectedResults = [
+                {
+                    'some-hash-key': 'some-value',
+                    'other-key': 12345,
+                    'still-other-key': {
+                        'key1': 999,
+                        'key2': '444'
+                    }
+                }
+            ];
+
+            sinon.stub(connectorMock, 'query').callsArgWith(1, null, queryResults);
+
+            table.query(doc, function thisCallback(err, result) {
+                if (err) return done(err);
+                expect(result).to.deep.equals(expectedResults);
+                connectorMock.query.restore();
+                done();
+            });
+        });
+
+        it('should return the scan results in the form of plain js objects (not dynamo)', function(done) {
+            var doc = {
+                'a-key': 'some-string',
+                'other-key': 12345
+            };
+
+            var queryResults = {
+                Count: 2,
+                ScannedCount: 50,
+                Items: [
+                    {
+                        'some-hash-key': {S: 'some-value'},
+                        'other-key': {N: '12345'},
+                        'a-key': {S: 'some-string'},
+                        'still-other-key': {M: {
+                            'key1': {N: '999'},
+                            'key2': {S: '444'}
+                        }}
+                    },
+                    {
+                        'some-hash-key': {S: 'some-value-2'},
+                        'other-key': {N: '12345'},
+                        'a-key': {S: 'some-string'},
+                        'still-other-key': {M: {
+                            'key1': {N: '333'},
+                            'key2': {S: '111'}
+                        }}
+                    }
+                ]
+            };
+
+            var expectedResults = [
+                {
+                    'some-hash-key': 'some-value',
+                    'other-key': 12345,
+                    'a-key': 'some-string',
+                    'still-other-key': {
+                        'key1': 999,
+                        'key2': '444'
+                    }
+                },
+                {
+                    'some-hash-key': 'some-value-2',
+                    'other-key': 12345,
+                    'a-key': 'some-string',
+                    'still-other-key': {
+                        'key1': 333,
+                        'key2': '111'
+                    }
+                }
+            ];
+
+            sinon.stub(connectorMock, 'scan').callsArgWith(1, null, queryResults);
+
+            table.query(doc, function thisCallback(err, result) {
+                if (err) return done(err);
+                expect(result).to.deep.equals(expectedResults);
+                connectorMock.scan.restore();
+                done();
+            });
+        });
+
     });
 
 });
