@@ -17,21 +17,44 @@ var tableInfo = {
         AttributeDefinitions: [
             { AttributeName: 'some-hash-key', AttributeType: 'S' },
             { AttributeName: 'some-range-key', AttributeType: 'S' },
-            { AttributeName: 'some-other-attr', AttributeType: 'N' }
+            { AttributeName: 'some-other-attr', AttributeType: 'N' },
+            { AttributeName: 'some-global-index-attr', AttributeType: 'S' },
+            { AttributeName: 'some-local-index-attr', AttributeType: 'N' },
+        ],
+        GlobalSecondaryIndexes: [
+            {
+                IndexName: 'Global-Index-1',
+                IndexStatus: 'ACTIVE',
+                KeySchema: [
+                    { AttributeName: 'some-global-index-attr', KeyType: 'HASH' },
+                    { AttributeName: 'some-range-key', KeyType: 'RANGE' }
+                ],
+            }
+        ],
+        LocalSecondaryIndexes: [
+            {
+                IndexName: 'Local-Index-1',
+                IndexStatus: 'ACTIVE',
+                KeySchema: [
+                    { AttributeName: 'some-hash-key', KeyType: 'HASH' },
+                    { AttributeName: 'some-local-index-attr', KeyType: 'RANGE' }
+                ],
+            }
         ]
+
     }
 };
 
 var connectorMock = {
-    putItem: sinon.spy(function(item, callback) {
+    putItem: function(item, callback) {
         return callback();
-    }),
-    query: sinon.spy(function(item, callback) {
+    },
+    query: function(item, callback) {
         return callback();
-    }),
-    scan: sinon.spy(function(item, callback) {
+    },
+    scan: function(item, callback) {
         return callback();
-    })
+    }
 };
 
 var dbMock = {
@@ -334,16 +357,14 @@ describe('EnergyTable (class)', function() {
             });
         });
 
-        afterEach(function() {
-            connectorMock.putItem.reset();
-        });
-
         it('should call the DynamoDB API to put the item', function(done) {
             var dynamoItem = {
                 'some-hash-key': { S: 'some-value' },
                 'some-range-key': { S: 'some-range' },
                 'other-key': { N: '12345' }
             };
+
+            sinon.spy(connectorMock, 'putItem');
 
             table.putDynamoItem(dynamoItem, function thisCallback(err, result) {
                 if (err) return done(err);
@@ -352,6 +373,7 @@ describe('EnergyTable (class)', function() {
                     sinon.match({ Item: dynamoItem }),
                     thisCallback
                 );
+                connectorMock.putItem.restore();
                 done();
             });
         });
@@ -373,6 +395,8 @@ describe('EnergyTable (class)', function() {
                 ReturnValues: 'ALL_OLD',
             };
 
+            sinon.spy(connectorMock, 'putItem');
+
             table.putDynamoItem(dynamoItem, function thisCallback(err, result) {
                 if (err) return done(err);
                 expect(connectorMock.putItem).to.have.been.calledOnce;
@@ -380,6 +404,7 @@ describe('EnergyTable (class)', function() {
                     sinon.match(expectedRequest),
                     thisCallback
                 );
+                connectorMock.putItem.restore();
                 done();
             });
         });
@@ -395,11 +420,6 @@ describe('EnergyTable (class)', function() {
             table.init(function(err, table) {
                 return done(err);
             });
-        });
-
-        afterEach(function() {
-            connectorMock.query.reset();
-            connectorMock.scan.reset();
         });
 
         it('should call the query method on the connector, when the hash key is specified', function(done) {
@@ -419,15 +439,18 @@ describe('EnergyTable (class)', function() {
                     ':v1': {N: '12345'}
                 },
                 KeyConditionExpression: '#k0 = :v0 AND #k1 = :v1'
-            }
+            };
+
+            sinon.spy(connectorMock, 'query');
 
             table.query(doc, function thisCallback(err, result) {
                 if (err) return done(err);
                 expect(connectorMock.query).to.have.been.calledOnce;
                 expect(connectorMock.query).to.have.been.calledWith(
                     sinon.match(expectedQuery),
-                    thisCallback
+                    sinon.match.func
                 );
+                connectorMock.query.restore();
                 done();
             });
         });
@@ -451,13 +474,16 @@ describe('EnergyTable (class)', function() {
                 FilterExpression: '#k0 = :v0 AND #k1 = :v1'
             };
 
+            sinon.spy(connectorMock, 'scan');
+
             table.query(doc, function thisCallback(err, result) {
                 if (err) return done(err);
                 expect(connectorMock.scan).to.have.been.calledOnce;
                 expect(connectorMock.scan).to.have.been.calledWith(
                     sinon.match(expectedQuery),
-                    thisCallback
+                    sinon.match.func
                 );
+                connectorMock.scan.restore();
                 done();
             });
         });
