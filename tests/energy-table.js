@@ -550,4 +550,48 @@ describe('EnergyTable (class)', function() {
 
     });
 
+    describe('unique id automatic generation for hash key', function() {
+
+        var table;
+
+        beforeEach(function(done) {
+            table = new EnergyTable(mocks.dbMock, 'Table-HashKey');
+            table.init(function(err, table) {
+                return done(err);
+            });
+        });
+
+        it('should generate an uuid for itens without hash key,' +
+            'for put operations, when "autoHashKey" is true', function(done) {
+
+            var item = {
+                'not-the-hash-key': 'a string',
+                'another-key': 12345
+            };
+
+            var expectedDynamoItem = {
+                'some-hash-key': { S: sinon.match.string },
+                'not-the-hash-key': {S: 'a string'},
+                'another-key': { N: '12345' }
+            };
+
+            var stub = sinon.stub(table, 'putDynamoItem', function(dynamoItem, callback) {
+                expect(dynamoItem['some-hash-key']['S']).to.not.be.empty;
+                callback();
+            });
+
+            table.putItem(item, function thisCallback(err, result) {
+                if (err) return done(err);
+                expect(stub).to.have.been.calledOnce;
+                expect(stub).to.have.been.calledWith(
+                    sinon.match(expectedDynamoItem),
+                    thisCallback
+                );
+                stub.restore();
+                done();
+            });
+
+        });
+    });
+
 });
