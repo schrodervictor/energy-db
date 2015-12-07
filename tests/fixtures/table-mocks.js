@@ -46,6 +46,9 @@ var connectorMock = {
     },
     scan: function(item, callback) {
         return callback();
+    },
+    deleteItem: function(item, callback) {
+        return callback();
     }
 };
 

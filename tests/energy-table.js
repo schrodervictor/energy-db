@@ -550,6 +550,61 @@ describe('EnergyTable (class)', function() {
 
     });
 
+    describe('#delete(doc, callback)', function() {
+
+        var tableHashKey;
+        var tableHashRangeKey;
+
+        beforeEach(function(done) {
+            tableHashKey = new EnergyTable(mocks.dbMock, 'Table-HashKey');
+            tableHashKey.init(function(err, table) {
+                return done(err);
+            });
+        });
+
+        beforeEach(function(done) {
+            tableHashRangeKey = new EnergyTable(mocks.dbMock, 'Table-HashKey-RangeKey');
+            tableHashRangeKey.init(function(err, table) {
+                return done(err);
+            });
+        });
+
+        it('should call the deleteItem method on the connector (hash key)', function(done) {
+            var doc = {
+                'some-hash-key': 'some-value',
+            };
+
+            var expectedQuery = {
+                TableName: 'Table-HashKey',
+                Key: {'some-hash-key': {S:
+                    'some-value'
+                }},
+                ExpressionAttributeNames: {
+                    '#k0': 'some-hash-key',
+                },
+                ExpressionAttributeValues: {
+                    ':v0': {S: 'some-value'},
+                },
+                ConditionExpression: '#k0 = :v0'
+            };
+
+            sinon.spy(mocks.connectorMock, 'deleteItem');
+
+            tableHashKey.delete(doc, function thisCallback(err, result) {
+                if (err) return done(err);
+                expect(mocks.connectorMock.deleteItem).to.have.been.calledOnce;
+                expect(mocks.connectorMock.deleteItem).to.have.been.calledWith(
+                    sinon.match(expectedQuery),
+                    sinon.match.func
+                );
+                mocks.connectorMock.deleteItem.restore();
+                done();
+            });
+        });
+
+    });
+
+
     describe('unique id automatic generation for hash key', function() {
 
         var table;
