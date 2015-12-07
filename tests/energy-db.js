@@ -33,6 +33,7 @@ describe('energy-db', function() {
             energyDB.connect({}, function(err, db) {
                 if (err) return done(err);
                 expect(db).to.be.an.instanceOf(EnergyDB);
+                expect(db.connector).to.be.an.instanceOf(DynamoDB);
                 done();
             });
         });

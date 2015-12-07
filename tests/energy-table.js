@@ -4,78 +4,17 @@ var sinonChai = require('sinon-chai');
 var expect = chai.expect;
 chai.use(sinonChai);
 
+var mocks = require('./fixtures/table-mocks');
+
 var energyTable = require('../lib/energy-table');
 var EnergyTable = require('../lib/energy-table').EnergyTable;
-
-var tableInfo = {
-    Table: {
-        TableName: 'Sample-Table',
-        KeySchema: [
-            { AttributeName: 'some-hash-key', KeyType: 'HASH' },
-            { AttributeName: 'some-range-key', KeyType: 'RANGE' }
-        ],
-        AttributeDefinitions: [
-            { AttributeName: 'some-hash-key', AttributeType: 'S' },
-            { AttributeName: 'some-range-key', AttributeType: 'S' },
-            { AttributeName: 'some-other-attr', AttributeType: 'N' },
-            { AttributeName: 'some-global-index-attr', AttributeType: 'S' },
-            { AttributeName: 'some-local-index-attr', AttributeType: 'N' },
-        ],
-        GlobalSecondaryIndexes: [
-            {
-                IndexName: 'Global-Index-1',
-                IndexStatus: 'ACTIVE',
-                KeySchema: [
-                    { AttributeName: 'some-global-index-attr', KeyType: 'HASH' },
-                    { AttributeName: 'some-range-key', KeyType: 'RANGE' }
-                ],
-            }
-        ],
-        LocalSecondaryIndexes: [
-            {
-                IndexName: 'Local-Index-1',
-                IndexStatus: 'ACTIVE',
-                KeySchema: [
-                    { AttributeName: 'some-hash-key', KeyType: 'HASH' },
-                    { AttributeName: 'some-local-index-attr', KeyType: 'RANGE' }
-                ],
-            }
-        ]
-
-    }
-};
-
-var connectorMock = {
-    putItem: function(item, callback) {
-        return callback();
-    },
-    query: function(item, callback) {
-        return callback();
-    },
-    scan: function(item, callback) {
-        return callback();
-    }
-};
-
-var dbMock = {
-    describeTable: function(tableName, callback) {
-        if (tableName === tableInfo.Table.TableName) {
-            return callback(null, tableInfo);
-        } else {
-            return callback(new Error());
-        }
-    },
-    getConnector: function() {
-        return connectorMock;
-    }
-};
 
 describe('EnergyTable (module)', function() {
 
     describe('#getInstance(db, tableName, callback)', function() {
 
         it('should pass an EnergyTable instance to the callback', function(done) {
-            energyTable.getInstance(dbMock, 'Sample-Table', function(err, table) {
+            energyTable.getInstance(mocks.dbMock, 'Table-HashKey', function(err, table) {
                 if (err) done(err);
                 expect(table).to.be.an.instanceOf(EnergyTable);
                 done();
@@ -91,7 +30,7 @@ describe('EnergyTable (class)', function() {
     describe('EnergyTable(db, tableName) - constructor', function() {
 
         it('should set the hashKey and rangeKey properties when constructing', function(done) {
-            energyTable.getInstance(dbMock, 'Sample-Table', function(err, table) {
+            energyTable.getInstance(mocks.dbMock, 'Table-HashKey-RangeKey', function(err, table) {
                 if (err) done(err);
                 expect(table.hashKey).to.equals('some-hash-key');
                 expect(table.rangeKey).to.equals('some-range-key');
@@ -100,10 +39,10 @@ describe('EnergyTable (class)', function() {
         });
 
         it('should initialize the queryBase object', function(done) {
-            energyTable.getInstance(dbMock, 'Sample-Table', function(err, table) {
+            energyTable.getInstance(mocks.dbMock, 'Table-HashKey', function(err, table) {
                 if (err) done(err);
                 var queryBase = {
-                    TableName: 'Sample-Table'
+                    TableName: 'Table-HashKey'
                 };
                 expect(table.queryBase).to.deep.equal(queryBase);
                 done();
@@ -115,8 +54,8 @@ describe('EnergyTable (class)', function() {
     describe('#setKeySchema(tableInfo)', function() {
 
         it('should set the table properties with keys information', function() {
-            var table = new EnergyTable(dbMock, 'Sample-Table');
-            table.setKeySchema(tableInfo);
+            var table = new EnergyTable(mocks.dbMock, 'Table-HashKey-RangeKey');
+            table.setKeySchema(mocks['Table-HashKey-RangeKey']);
             expect(table.hashKey).to.equals('some-hash-key');
             expect(table.hashKeyType).to.equals('S');
             expect(table.rangeKey).to.equals('some-range-key');
@@ -128,9 +67,9 @@ describe('EnergyTable (class)', function() {
     describe('#initQueryBase()', function() {
 
         it('should initialize the query base object', function() {
-            var table = new EnergyTable(dbMock, 'Sample-Table');
+            var table = new EnergyTable(mocks.dbMock, 'Table-HashKey');
             var expectedQueryBase = {
-                TableName: 'Sample-Table'
+                TableName: 'Table-HashKey'
             };
             table.initQueryBase();
             expect(table.queryBase).to.deep.equal(expectedQueryBase);
@@ -143,7 +82,7 @@ describe('EnergyTable (class)', function() {
         var table;
 
         beforeEach(function(done) {
-            table = new EnergyTable(dbMock, 'Sample-Table');
+            table = new EnergyTable(mocks.dbMock, 'Table-HashKey');
             table.init(function(err, table) {
                 return done(err);
             });
@@ -151,7 +90,7 @@ describe('EnergyTable (class)', function() {
 
         it('should add a new query param to the queryBase object', function() {
             var queryBase = {
-                TableName: 'Sample-Table',
+                TableName: 'Table-HashKey',
                 NewParam: 'new-value'
             };
             table.addQueryParam('NewParam', 'new-value');
@@ -165,7 +104,7 @@ describe('EnergyTable (class)', function() {
         var table;
 
         beforeEach(function(done) {
-            table = new EnergyTable(dbMock, 'Sample-Table');
+            table = new EnergyTable(mocks.dbMock, 'Table-HashKey');
             table.init(function(err, table) {
                 return done(err);
             });
@@ -173,7 +112,7 @@ describe('EnergyTable (class)', function() {
 
         it('should add several params to the queryBase object', function() {
             var queryBase = {
-                TableName: 'Sample-Table',
+                TableName: 'Table-HashKey',
                 NewParam1: 'new-value-1',
                 NewParam2: 'new-value-2'
             };
@@ -191,7 +130,7 @@ describe('EnergyTable (class)', function() {
         var table;
 
         beforeEach(function(done) {
-            table = new EnergyTable(dbMock, 'Sample-Table');
+            table = new EnergyTable(mocks.dbMock, 'Table-HashKey');
             table.init(function(err, table) {
                 return done(err);
             });
@@ -199,7 +138,7 @@ describe('EnergyTable (class)', function() {
 
         it('should add the API flag to return the consumed capacity', function() {
             var queryBase = {
-                TableName: 'Sample-Table',
+                TableName: 'Table-HashKey',
                 ReturnConsumedCapacity: 'TOTAL'
             };
             table.returnConsumedCapacity();
@@ -213,7 +152,7 @@ describe('EnergyTable (class)', function() {
         var table;
 
         beforeEach(function(done) {
-            table = new EnergyTable(dbMock, 'Sample-Table');
+            table = new EnergyTable(mocks.dbMock, 'Table-HashKey');
             table.init(function(err, table) {
                 return done(err);
             });
@@ -221,7 +160,7 @@ describe('EnergyTable (class)', function() {
 
         it('should add the API flag to return all the old values for after an update query', function() {
             var queryBase = {
-                TableName: 'Sample-Table',
+                TableName: 'Table-HashKey',
                 ReturnValues: 'ALL_OLD'
             };
             table.returnOldValues();
@@ -232,11 +171,19 @@ describe('EnergyTable (class)', function() {
 
     describe('#validateDynamoItem(dynamoItem, callback)', function() {
 
-        var table;
+        var tableHashKey;
+        var tableHashRangeKey;
 
         beforeEach(function(done) {
-            table = new EnergyTable(dbMock, 'Sample-Table');
-            table.init(function(err, table) {
+            tableHashKey = new EnergyTable(mocks.dbMock, 'Table-HashKey');
+            tableHashKey.init(function(err, table) {
+                return done(err);
+            });
+        });
+
+        beforeEach(function(done) {
+            tableHashRangeKey = new EnergyTable(mocks.dbMock, 'Table-HashKey-RangeKey');
+            tableHashRangeKey.init(function(err, table) {
                 return done(err);
             });
         });
@@ -247,7 +194,7 @@ describe('EnergyTable (class)', function() {
                 'some-range-key': { S: 'some-range' }
             };
 
-            table.validateDynamoItem(dynamoItem, function(err, validDynamoItem) {
+            tableHashRangeKey.validateDynamoItem(dynamoItem, function(err, validDynamoItem) {
                 if (err) return done(err);
                 expect(validDynamoItem).to.equals(dynamoItem);
                 done();
@@ -260,7 +207,7 @@ describe('EnergyTable (class)', function() {
                 'other-invalid-key': { N: '12345' }
             };
 
-            table.validateDynamoItem(dynamoItem, function(err, validDynamoItem) {
+            tableHashRangeKey.validateDynamoItem(dynamoItem, function(err, validDynamoItem) {
                 expect(err).to.be.an.instanceOf(Error);
                 done();
             });
@@ -272,7 +219,7 @@ describe('EnergyTable (class)', function() {
                 'some-invalid-key': { N: '12345' }
             };
 
-            table.validateDynamoItem(dynamoItem, function(err, validDynamoItem) {
+            tableHashRangeKey.validateDynamoItem(dynamoItem, function(err, validDynamoItem) {
                 expect(err).to.be.an.instanceOf(Error);
                 done();
             });
@@ -284,7 +231,7 @@ describe('EnergyTable (class)', function() {
                 'some-range-key': { S: 'some-range' }
             };
 
-            table.validateDynamoItem(dynamoItem, function(err, validDynamoItem) {
+            tableHashKey.validateDynamoItem(dynamoItem, function(err, validDynamoItem) {
                 expect(err).to.be.an.instanceOf(Error);
                 done();
             });
@@ -296,7 +243,7 @@ describe('EnergyTable (class)', function() {
                 'some-range-key': { N: '12345' }
             };
 
-            table.validateDynamoItem(dynamoItem, function(err, validDynamoItem) {
+            tableHashRangeKey.validateDynamoItem(dynamoItem, function(err, validDynamoItem) {
                 expect(err).to.be.an.instanceOf(Error);
                 done();
             });
@@ -309,7 +256,7 @@ describe('EnergyTable (class)', function() {
         var table;
 
         beforeEach(function(done) {
-            table = new EnergyTable(dbMock, 'Sample-Table');
+            table = new EnergyTable(mocks.dbMock, 'Table-HashKey-RangeKey');
             table.init(function(err, table) {
                 return done(err);
             });
@@ -340,6 +287,7 @@ describe('EnergyTable (class)', function() {
                     sinon.match(expectedDynamoItem),
                     thisCallback
                 );
+                stub.restore();
                 done();
             });
         });
@@ -351,7 +299,7 @@ describe('EnergyTable (class)', function() {
         var table;
 
         beforeEach(function(done) {
-            table = new EnergyTable(dbMock, 'Sample-Table');
+            table = new EnergyTable(mocks.dbMock, 'Table-HashKey-RangeKey');
             table.init(function(err, table) {
                 return done(err);
             });
@@ -364,16 +312,16 @@ describe('EnergyTable (class)', function() {
                 'other-key': { N: '12345' }
             };
 
-            sinon.spy(connectorMock, 'putItem');
+            sinon.spy(mocks.connectorMock, 'putItem');
 
             table.putDynamoItem(dynamoItem, function thisCallback(err, result) {
                 if (err) return done(err);
-                expect(connectorMock.putItem).to.have.been.calledOnce;
-                expect(connectorMock.putItem).to.have.been.calledWith(
+                expect(mocks.connectorMock.putItem).to.have.been.calledOnce;
+                expect(mocks.connectorMock.putItem).to.have.been.calledWith(
                     sinon.match({ Item: dynamoItem }),
                     thisCallback
                 );
-                connectorMock.putItem.restore();
+                mocks.connectorMock.putItem.restore();
                 done();
             });
         });
@@ -389,22 +337,22 @@ describe('EnergyTable (class)', function() {
             };
 
             var expectedRequest = {
-                TableName: 'Sample-Table',
+                TableName: 'Table-HashKey-RangeKey',
                 Item: dynamoItem,
                 ReturnConsumedCapacity: 'TOTAL',
                 ReturnValues: 'ALL_OLD',
             };
 
-            sinon.spy(connectorMock, 'putItem');
+            sinon.spy(mocks.connectorMock, 'putItem');
 
             table.putDynamoItem(dynamoItem, function thisCallback(err, result) {
                 if (err) return done(err);
-                expect(connectorMock.putItem).to.have.been.calledOnce;
-                expect(connectorMock.putItem).to.have.been.calledWith(
+                expect(mocks.connectorMock.putItem).to.have.been.calledOnce;
+                expect(mocks.connectorMock.putItem).to.have.been.calledWith(
                     sinon.match(expectedRequest),
                     thisCallback
                 );
-                connectorMock.putItem.restore();
+                mocks.connectorMock.putItem.restore();
                 done();
             });
         });
@@ -413,11 +361,19 @@ describe('EnergyTable (class)', function() {
 
     describe('#query(doc, callback)', function() {
 
-        var table;
+        var tableHashKey;
+        var tableHashRangeKey;
 
         beforeEach(function(done) {
-            table = new EnergyTable(dbMock, 'Sample-Table');
-            table.init(function(err, table) {
+            tableHashKey = new EnergyTable(mocks.dbMock, 'Table-HashKey');
+            tableHashKey.init(function(err, table) {
+                return done(err);
+            });
+        });
+
+        beforeEach(function(done) {
+            tableHashRangeKey = new EnergyTable(mocks.dbMock, 'Table-HashKey-RangeKey');
+            tableHashRangeKey.init(function(err, table) {
                 return done(err);
             });
         });
@@ -429,7 +385,7 @@ describe('EnergyTable (class)', function() {
             };
 
             var expectedQuery = {
-                TableName: 'Sample-Table',
+                TableName: 'Table-HashKey',
                 ExpressionAttributeNames: {
                     '#k0': 'some-hash-key',
                     '#k1': 'other-key'
@@ -441,16 +397,16 @@ describe('EnergyTable (class)', function() {
                 KeyConditionExpression: '#k0 = :v0 AND #k1 = :v1'
             };
 
-            sinon.spy(connectorMock, 'query');
+            sinon.spy(mocks.connectorMock, 'query');
 
-            table.query(doc, function thisCallback(err, result) {
+            tableHashKey.query(doc, function thisCallback(err, result) {
                 if (err) return done(err);
-                expect(connectorMock.query).to.have.been.calledOnce;
-                expect(connectorMock.query).to.have.been.calledWith(
+                expect(mocks.connectorMock.query).to.have.been.calledOnce;
+                expect(mocks.connectorMock.query).to.have.been.calledWith(
                     sinon.match(expectedQuery),
                     sinon.match.func
                 );
-                connectorMock.query.restore();
+                mocks.connectorMock.query.restore();
                 done();
             });
         });
@@ -462,7 +418,7 @@ describe('EnergyTable (class)', function() {
             };
 
             var expectedQuery = {
-                TableName: 'Sample-Table',
+                TableName: 'Table-HashKey',
                 ExpressionAttributeNames: {
                     '#k0': 'a-key',
                     '#k1': 'other-key'
@@ -474,16 +430,16 @@ describe('EnergyTable (class)', function() {
                 FilterExpression: '#k0 = :v0 AND #k1 = :v1'
             };
 
-            sinon.spy(connectorMock, 'scan');
+            sinon.spy(mocks.connectorMock, 'scan');
 
-            table.query(doc, function thisCallback(err, result) {
+            tableHashKey.query(doc, function thisCallback(err, result) {
                 if (err) return done(err);
-                expect(connectorMock.scan).to.have.been.calledOnce;
-                expect(connectorMock.scan).to.have.been.calledWith(
+                expect(mocks.connectorMock.scan).to.have.been.calledOnce;
+                expect(mocks.connectorMock.scan).to.have.been.calledWith(
                     sinon.match(expectedQuery),
                     sinon.match.func
                 );
-                connectorMock.scan.restore();
+                mocks.connectorMock.scan.restore();
                 done();
             });
         });
@@ -520,12 +476,12 @@ describe('EnergyTable (class)', function() {
                 }
             ];
 
-            sinon.stub(connectorMock, 'query').callsArgWith(1, null, queryResults);
+            sinon.stub(mocks.connectorMock, 'query').callsArgWith(1, null, queryResults);
 
-            table.query(doc, function thisCallback(err, result) {
+            tableHashKey.query(doc, function thisCallback(err, result) {
                 if (err) return done(err);
                 expect(result).to.deep.equals(expectedResults);
-                connectorMock.query.restore();
+                mocks.connectorMock.query.restore();
                 done();
             });
         });
@@ -582,12 +538,12 @@ describe('EnergyTable (class)', function() {
                 }
             ];
 
-            sinon.stub(connectorMock, 'scan').callsArgWith(1, null, queryResults);
+            sinon.stub(mocks.connectorMock, 'scan').callsArgWith(1, null, queryResults);
 
-            table.query(doc, function thisCallback(err, result) {
+            tableHashKey.query(doc, function thisCallback(err, result) {
                 if (err) return done(err);
                 expect(result).to.deep.equals(expectedResults);
-                connectorMock.scan.restore();
+                mocks.connectorMock.scan.restore();
                 done();
             });
         });
