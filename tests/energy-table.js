@@ -430,6 +430,7 @@ describe('EnergyTable (class)', function() {
 
     var tableHashKey;
     var tableHashRangeKey;
+    var tableWithGlobalIndex;
 
     beforeEach(function(done) {
       tableHashKey = new EnergyTable(mocks.dbMock, 'Table-HashKey');
@@ -441,6 +442,13 @@ describe('EnergyTable (class)', function() {
     beforeEach(function(done) {
       tableHashRangeKey = new EnergyTable(mocks.dbMock, 'Table-HashKey-RangeKey');
       tableHashRangeKey.init(function(err, table) {
+        return done(err);
+      });
+    });
+
+    beforeEach(function(done) {
+      tableWithGlobalIndex = new EnergyTable(mocks.dbMock, 'Table-HashKey-RangeKey-GlobalIndex-LocalIndex');
+      tableWithGlobalIndex.init(function(err, table) {
         return done(err);
       });
     });
@@ -477,6 +485,43 @@ describe('EnergyTable (class)', function() {
         done();
       });
     });
+
+    it('should call the query method on the connector, when the hash key of ' +
+      'an index is specified',
+      function(done) {
+        var doc = {
+          'some-global-index-attr': 'some-value',
+          'other-key': 12345
+        };
+
+        var expectedQuery = {
+          TableName: 'Table-HashKey-RangeKey-GlobalIndex-LocalIndex',
+          IndexName: 'Global-Index-1',
+          ExpressionAttributeNames: {
+            '#k0': 'some-global-index-attr',
+            '#k1': 'other-key'
+          },
+          ExpressionAttributeValues: {
+            ':v0': {S: 'some-value'},
+            ':v1': {N: '12345'}
+          },
+          KeyConditionExpression: '#k0 = :v0 AND #k1 = :v1'
+        };
+
+        sinon.spy(mocks.connectorMock, 'query');
+
+        tableWithGlobalIndex.query(doc, function thisCallback(err, result) {
+          if (err) return done(err);
+          expect(mocks.connectorMock.query).to.have.been.calledOnce;
+          expect(mocks.connectorMock.query).to.have.been.calledWith(
+            sinon.match(expectedQuery),
+            sinon.match.func
+          );
+          mocks.connectorMock.query.restore();
+          done();
+        });
+      }
+    );
 
     it('should call the scan method on the connector, when the hash key is not specified', function(done) {
       var doc = {
