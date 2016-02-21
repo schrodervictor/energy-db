@@ -95,4 +95,15 @@ describe('EnergyDB', function() {
     });
   });
 
+  describe('#collection(collectionName, callback)', function() {
+
+    it('should work exactly like the table method (alias)', function(done) {
+      var db = new EnergyDB({}, dynamoDBMock);
+      db.collection('Table-Name', function(err, table) {
+        if (err) return done(err);
+        expect(table).to.be.an.instanceOf(EnergyTable);
+        done();
+      });
+    });
+  });
 });
