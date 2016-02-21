@@ -34,7 +34,7 @@ var infoTableHashKeyRangeKey = {
 
 var infoTableHashKeyRangeKeyGlobalIndexLocalIndex = {
   Table: {
-    TableName: 'Sample-Table',
+    TableName: 'Table-HashKey-RangeKey-GlobalIndex-LocalIndex',
     KeySchema: [
       { AttributeName: 'some-hash-key', KeyType: 'HASH' },
       { AttributeName: 'some-range-key', KeyType: 'RANGE' }

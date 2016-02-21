@@ -671,6 +671,52 @@ describe('EnergyTable (class)', function() {
 
   });
 
+  describe('#queryHasAnIndexHashKey(doc)', function() {
+
+    var tableWithoutIndexes;
+    var tableWithIndexes;
+
+    beforeEach(function(done) {
+      tableWithoutIndexes = new EnergyTable(mocks.dbMock, 'Table-HashKey');
+      tableWithoutIndexes.init(function(err, table) {
+        return done(err);
+      });
+    });
+
+    beforeEach(function(done) {
+      tableWithIndexes = new EnergyTable(mocks.dbMock, 'Table-HashKey-RangeKey-GlobalIndex-LocalIndex');
+      tableWithIndexes.init(function(err, table) {
+        return done(err);
+      });
+    });
+
+    it('should return true/false depending if the query has or not keys that ' +
+      'match an index',
+      function() {
+
+        expect(
+          tableWithoutIndexes.queryHasAnIndexHashKey({
+            'some-key': 'some-value',
+          })
+        ).to.be.false;
+
+        expect(
+          tableWithIndexes.queryHasAnIndexHashKey({
+            'some-random-key': 'some-value',
+          })
+        ).to.be.false;
+
+        expect(
+          tableWithIndexes.queryHasAnIndexHashKey({
+            'some-global-index-attr': 'some-value',
+          })
+        ).to.be.true;
+
+      }
+    );
+
+  });
+
 
   describe('unique id automatic generation for hash key', function() {
 
