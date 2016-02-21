@@ -717,6 +717,30 @@ describe('EnergyTable (class)', function() {
 
   });
 
+  describe('#findSuitableIndex(query)', function() {
+
+    var tableWithIndexes;
+
+    beforeEach(function(done) {
+      tableWithIndexes = new EnergyTable(mocks.dbMock, 'Table-HashKey-RangeKey-GlobalIndex-LocalIndex');
+      tableWithIndexes.init(function(err, table) {
+        return done(err);
+      });
+    });
+
+    it('should return the index name if the query has key that matches an index',
+      function() {
+
+        expect(
+          tableWithIndexes.findSuitableIndex({
+            'some-global-index-attr': 'some-value',
+          })
+        ).to.equals('Global-Index-1');
+
+      }
+    );
+
+  });
 
   describe('unique id automatic generation for hash key', function() {
 
