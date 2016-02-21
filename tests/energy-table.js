@@ -64,6 +64,73 @@ describe('EnergyTable (class)', function() {
 
   });
 
+  describe('#getIndexKeySchema(indexInfo, attributesInfo)', function() {
+
+    it('should return the index key schema information', function() {
+      var indexInfo = {
+        IndexName: 'IndexName1',
+        IndexStatus: 'ACTIVE',
+        KeySchema: [
+          { AttributeName: 'some-index-hash-key', KeyType: 'HASH' },
+          { AttributeName: 'some-index-range-key', KeyType: 'RANGE' }
+        ]
+      };
+
+      var attributesInfo = [
+        { AttributeName: 'some-irrelevant-key', AttributeType: 'S' },
+        { AttributeName: 'some-index-range-key', AttributeType: 'S' },
+        { AttributeName: 'some-index-hash-key', AttributeType: 'N' },
+      ];
+
+      var expectedResult = {
+        name: 'IndexName1',
+        hashKey: 'some-index-hash-key',
+        hashKeyType: 'N',
+        rangeKey: 'some-index-range-key',
+        rangeKeyType: 'S'
+      };
+
+      var table = new EnergyTable(mocks.dbMock, 'Table-HashKey-RangeKey');
+
+      var result = table.getIndexKeySchema(indexInfo, attributesInfo);
+
+      expect(result).to.deep.equals(expectedResult);
+    });
+
+  });
+
+  describe('#setIndexes(tableInfo)', function() {
+
+    it('should set the indexes information for the table', function() {
+      var expectedIndexes = [
+        {
+          name: 'Global-Index-1',
+          hashKey: 'some-global-index-attr',
+          hashKeyType: 'S',
+          rangeKey: 'some-range-key',
+          rangeKeyType: 'S'
+        },
+        {
+          name: 'Local-Index-1',
+          hashKey: 'some-hash-key',
+          hashKeyType: 'S',
+          rangeKey: 'some-local-index-attr',
+          rangeKeyType: 'N'
+        }
+      ];
+
+      var table = new EnergyTable(
+        mocks.dbMock,
+        'Table-HashKey-RangeKey-GlobalIndex-LocalIndex'
+      );
+
+      table.setIndexes(mocks['Table-HashKey-RangeKey-GlobalIndex-LocalIndex']);
+
+      expect(table.indexes).to.deep.include.members(expectedIndexes);
+    });
+
+  });
+
   describe('#initQueryBase()', function() {
 
     it('should initialize the query base object', function() {
