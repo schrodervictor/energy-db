@@ -22,7 +22,7 @@ The basics. EnergyDB needs to use DynamoDB. You have two options: you may pass
 a DynamoDB instance to EnergyDB or simply provide the credentials and let us
 instantiate it for you:
 
-```
+```javascript
 var energyDB = require('energy-db');
 
 var settings = {
@@ -39,7 +39,7 @@ energyDB.connect(settings, function(err, db) {
 Once you have the EnergyDb instance, you can get access to tables and perform
 operations:
 
-```
+```javascript
 db.table('Your-Table-Name', function(err, table) {
 
   var doc = {
@@ -65,7 +65,7 @@ define before performing the queries. For example, you may want to have the
 information about the consumed read/write capacity or have the old values of
 a document you are updating. In this case, you can do something like this:
 
-```
+```javascript
 db.table('Your-Table-Name', function(err, table) {
 
   table.returnConsumedCapacity().returnOldValues();
@@ -81,9 +81,9 @@ to do something more complex.
 
 ## Unit tests
 
-This module was TDD'ed and we good test coverage using mocha+chai. We believe
-all core functionality is covered, but some error cases are not. We are
-working to handle these scenarios.
+This module was TDD'ed and we have good test coverage using mocha+chai. We
+believe all core functionality is covered, but some error cases are not. We
+are working to handle these scenarios.
 
 ## Contributing
 
