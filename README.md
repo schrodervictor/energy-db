@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/schrodervictor/energy-db.svg?branch=master)](https://travis-ci.org/schrodervictor/energy-db)
+
 energy-db
 =========
 
