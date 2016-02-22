@@ -1,0 +1,94 @@
+energy-db
+=========
+
+What is a dynamo without energy???
+
+AWS DynamoDB is great, but it can be very annoying to work with bare hands.
+Our EnergyDB is a wrapper around DynamoDB, aiming to make it easier to use
+this managed cloud database, specially for those used to the way MongoDB works.
+
+This still an ALPHA version! Lots of things need to be improved.
+
+## Instalation
+
+If you are reading you know how to install a npm module. Just put it in your
+dependencies list or install it globally if you are one of those people.
+
+## How to use it
+
+The basics. EnergyDB needs to use DynamoDB. You have two options: you may pass
+a DynamoDB instance to EnergyDB or simply provide the credentials and let us
+instantiate it for you:
+
+```
+var energyDB = require('energy-db');
+
+var settings = {
+  region: 'eu-central-1',
+  accessKeyId: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+  secretAccessKey: 'vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv'
+};
+
+energyDB.connect(settings, function(err, db) {
+  // energy-db is ready to use!!
+});
+```
+
+Once you have the EnergyDb instance, you can get access to tables and perform
+operations:
+
+```
+db.table('Your-Table-Name', function(err, table) {
+
+  var doc = {
+    'key-0': 'value-0',
+    'key-1': 12345
+  };
+
+  table.putItem(doc, callback);
+  // or
+  table.query(doc, callback);
+  // or
+  table.delete(doc, callback);
+});
+
+```
+
+You don't have to bother about converting the object to the DynamoDB
+strong-typed format. EnergyDB uses DynamoDoc internally to make this
+convertion for you.
+
+The EnergyTable also supports a number of additional settings, that you can
+define before performing the queries. For example, you may want to have the
+information about the consumed read/write capacity or have the old values of
+a document you are updating. In this case, you can do something like this:
+
+```
+db.table('Your-Table-Name', function(err, table) {
+
+  table.returnConsumedCapacity().returnOldValues();
+
+  // perform your queries...
+
+});
+
+```
+
+As usual, I suggest you to take a look on the code and the tests, if you want
+to do something more complex.
+
+## Unit tests
+
+This module was TDD'ed and we good test coverage using mocha+chai. We believe
+all core functionality is covered, but some error cases are not. We are
+working to handle these scenarios.
+
+## Contributing
+
+Fork the repo, create a branch, do awesome additions and submit a
+pull-request. Only PR's with tests will be considered.
+
+## Releases
+
+* 0.0.1 Initial alpha release
+
