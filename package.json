@@ -1,16 +1,35 @@
 {
   "name": "energy-db",
-  "version": "0.0.1",
+  "version": "v0.0.1",
   "description": "a sane and easy to use wrapper around AWS DynamoDB",
+  "keywords": [
+    "dynamodb",
+    "dynamo-db",
+    "energy-db",
+    "dynamo-doc",
+    "aws"
+  ],
   "author": {
     "name": "Victor Schröder",
     "email": "schrodervictor@gmail.com"
   },
-  "license": "MIT",
+  "contributors": [
+    {
+      "name": "Victor Schröder",
+      "email": "schrodervictor@gmail.com"
+    }
+  ],
+  "license": "ISC",
   "repository": {
     "type": "git",
     "url": "git://github.com/schrodervictor/energy-db.git"
   },
+  "maintainers": [
+    {
+      "name": "Victor Schröder",
+      "email": "schrodervictor@gmail.com"
+    }
+  ],
   "main": "./index",
   "dependencies": {
     "aws-sdk": "^2.2.0",
