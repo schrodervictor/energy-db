@@ -556,6 +556,49 @@ describe('EnergyTable (class)', function() {
       });
     });
 
+    it('should work with more complex comparisons', function(done) {
+      var doc = {
+        'some-hash-key': 'some-value',
+        'other-key-0': {'$gt': 12345},
+        'other-key-1': {'$gte': 44444},
+        'other-key-2': {'$lt': 55555},
+        'other-key-3': {'$lte': 99999},
+      };
+
+      var expectedQuery = {
+        TableName: 'Table-HashKey',
+        ExpressionAttributeNames: {
+          '#k0': 'some-hash-key',
+          '#k1': 'other-key-0',
+          '#k2': 'other-key-1',
+          '#k3': 'other-key-2',
+          '#k4': 'other-key-3'
+        },
+        ExpressionAttributeValues: {
+          ':v0': {S: 'some-value'},
+          ':v1': {N: '12345'},
+          ':v2': {N: '44444'},
+          ':v3': {N: '55555'},
+          ':v4': {N: '99999'}
+        },
+        KeyConditionExpression:
+          '#k0 = :v0 AND #k1 > :v1 AND #k2 >= :v2 AND #k3 < :v3 AND #k4 <= :v4'
+      };
+
+      sinon.spy(mocks.connectorMock, 'query');
+
+      tableHashKey.query(doc, function thisCallback(err, result) {
+        if (err) return done(err);
+        expect(mocks.connectorMock.query).to.have.been.calledOnce;
+        expect(mocks.connectorMock.query).to.have.been.calledWith(
+          sinon.match(expectedQuery),
+          sinon.match.func
+        );
+        mocks.connectorMock.query.restore();
+        done();
+      });
+    });
+
     it('should return the query results in the form of plain js objects (not dynamo)', function(done) {
       var doc = {
         'some-hash-key': 'some-value',
