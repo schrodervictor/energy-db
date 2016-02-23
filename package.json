@@ -1,6 +1,6 @@
 {
   "name": "energy-db",
-  "version": "v0.0.1",
+  "version": "v0.0.2",
   "description": "a sane and easy to use wrapper around AWS DynamoDB",
   "keywords": [
     "dynamodb",
@@ -33,7 +33,7 @@
   "main": "./index",
   "dependencies": {
     "aws-sdk": "^2.2.0",
-    "dynamo-doc": "^0.1.0",
+    "dynamo-doc": "^0.1.1",
     "node-uuid": "^1.4.3"
   },
   "devDependencies": {
