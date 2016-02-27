@@ -731,9 +731,9 @@ describe('EnergyTable (class)', function() {
 
       var expectedQuery = {
         TableName: 'Table-HashKey',
-        Key: {'some-hash-key': {S:
-          'some-value'
-        }},
+        Key: {
+          'some-hash-key': {S: 'some-value'}
+        },
         ExpressionAttributeNames: {
           '#k0': 'some-hash-key',
         },
