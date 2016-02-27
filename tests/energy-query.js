@@ -132,6 +132,61 @@ describe('EnergyQuery (class)', function() {
 
       expect(instance.getQuery()).to.deep.equals(expectedQuery);
     });
+
+    it('should return the correct query for "update" operations', function() {
+      var baseQuery = {
+        TableName: 'Name-Of-The-Table'
+      };
+
+      var queryDoc = {
+        'key-0': 'value-0',
+        'key-1': 98765,
+        'key-2': 12345,
+      };
+
+      var updateDoc = {
+        '$set': {
+          'key-0': 'value-0-new',
+          'key-1': 11111,
+        },
+      };
+
+      var expectedQuery = {
+        TableName: 'Name-Of-The-Table',
+        Key: {
+          'key-0': {S: 'value-0'},
+          'key-1': {N: '98765'}
+        },
+        ExpressionAttributeNames: {
+          '#k0': 'key-0',
+          '#k1': 'key-1',
+          '#k2': 'key-2',
+          '#k3': 'key-0',
+          '#k4': 'key-1',
+        },
+        ExpressionAttributeValues: {
+          ':v0': {S: 'value-0'},
+          ':v1': {N: '98765'},
+          ':v2': {N: '12345'},
+          ':v3': {S: 'value-0-new'},
+          ':v4': {N: '11111'},
+        },
+        ConditionExpression:
+          '#k0 = :v0 AND #k1 = :v1 AND #k2 = :v2',
+        UpdateExpression:
+          'SET #k3 = :v3, #k4 = :v4'
+      };
+
+      var instance = new EnergyQuery(
+        'update',
+        baseQuery,
+        queryDoc,
+        'key-0',
+        'key-1'
+      );
+
+      expect(instance.getUpdateQuery(updateDoc)).to.deep.equals(expectedQuery);
+    });
   });
 });
 
