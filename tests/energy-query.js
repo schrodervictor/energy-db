@@ -149,6 +149,9 @@ describe('EnergyQuery (class)', function() {
           'key-0': 'value-0-new',
           'key-1': 11111,
         },
+        '$inc': {
+          'key-2': 3
+        },
       };
 
       var expectedQuery = {
@@ -163,6 +166,7 @@ describe('EnergyQuery (class)', function() {
           '#k2': 'key-2',
           '#k3': 'key-0',
           '#k4': 'key-1',
+          '#k5': 'key-2',
         },
         ExpressionAttributeValues: {
           ':v0': {S: 'value-0'},
@@ -170,11 +174,12 @@ describe('EnergyQuery (class)', function() {
           ':v2': {N: '12345'},
           ':v3': {S: 'value-0-new'},
           ':v4': {N: '11111'},
+          ':v5': {N: '3'},
         },
         ConditionExpression:
           '#k0 = :v0 AND #k1 = :v1 AND #k2 = :v2',
         UpdateExpression:
-          'SET #k3 = :v3, #k4 = :v4'
+          'SET #k3 = :v3, #k4 = :v4 ADD #k5 :v5'
       };
 
       var instance = new EnergyQuery(
