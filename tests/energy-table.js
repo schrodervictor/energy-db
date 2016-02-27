@@ -705,6 +705,86 @@ describe('EnergyTable (class)', function() {
 
   });
 
+  describe('#update(doc, callback)', function() {
+
+    var tableHashRangeKey;
+
+    beforeEach(function(done) {
+      tableHashRangeKey = new EnergyTable(mocks.dbMock, 'Table-HashKey-RangeKey');
+      tableHashRangeKey.init(function(err, table) {
+        return done(err);
+      });
+    });
+
+    it('should call the update method on the connector with the correct query',
+      function(done) {
+
+        var doc = {
+          'some-hash-key': 'some-value-0',
+          'some-range-key': 'some-value-1',
+          'some-key-2': 11111,
+        };
+
+        var updateDoc = {
+          '$inc': {
+            'some-key-2': 33333
+          },
+          '$set': {
+            'some-key-0': 'some-value-new',
+            'some-key-1': 11111,
+          },
+          '$unset': {
+            'some-key-3': 1
+          },
+        };
+
+        var expectedQuery = {
+          TableName: 'Table-HashKey-RangeKey',
+          Key: {
+            'some-hash-key': {S: 'some-value-0'},
+            'some-range-key': {S: 'some-value-1'}
+          },
+          ExpressionAttributeNames: {
+            '#k0': 'some-hash-key',
+            '#k1': 'some-range-key',
+            '#k2': 'some-key-2',
+            '#k3': 'some-key-2',
+            '#k4': 'some-key-0',
+            '#k5': 'some-key-1',
+            '#k6': 'some-key-3',
+          },
+          ExpressionAttributeValues: {
+            ':v0': {S: 'some-value-0'},
+            ':v1': {S: 'some-value-1'},
+            ':v2': {N: '11111'},
+            ':v3': {N: '33333'},
+            ':v4': {S: 'some-value-new'},
+            ':v5': {N: '11111'},
+          },
+          ConditionExpression:
+            '#k0 = :v0 AND #k1 = :v1 AND #k2 = :v2',
+          UpdateExpression:
+            'ADD #k3 :v3 SET #k4 = :v4, #k5 = :v5 REMOVE #k6'
+        };
+
+        sinon.spy(mocks.connectorMock, 'updateItem');
+
+        tableHashRangeKey.update(doc, updateDoc, function(err, result) {
+          if (err) return done(err);
+          expect(mocks.connectorMock.updateItem).to.have.been.calledOnce;
+          expect(mocks.connectorMock.updateItem).to.have.been.calledWith(
+            sinon.match(expectedQuery),
+            sinon.match.func
+          );
+          mocks.connectorMock.updateItem.restore();
+          done();
+        });
+
+      }
+    );
+
+  });
+
   describe('#delete(doc, callback)', function() {
 
     var tableHashKey;
@@ -713,13 +793,6 @@ describe('EnergyTable (class)', function() {
     beforeEach(function(done) {
       tableHashKey = new EnergyTable(mocks.dbMock, 'Table-HashKey');
       tableHashKey.init(function(err, table) {
-        return done(err);
-      });
-    });
-
-    beforeEach(function(done) {
-      tableHashRangeKey = new EnergyTable(mocks.dbMock, 'Table-HashKey-RangeKey');
-      tableHashRangeKey.init(function(err, table) {
         return done(err);
       });
     });

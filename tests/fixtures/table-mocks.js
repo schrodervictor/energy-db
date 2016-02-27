@@ -89,6 +89,9 @@ var connectorMock = {
   },
   deleteItem: function(item, callback) {
     return callback();
+  },
+  updateItem: function(item, callback) {
+    return callback();
   }
 };
 
