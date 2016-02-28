@@ -14,6 +14,36 @@ describe('EnergyQuery (class)', function() {
 
   describe('#getQuery()', function() {
 
+    it('should return the correct query for "insert" operations', function(done) {
+      var baseQuery = {
+        TableName: 'Name-Of-The-Table'
+      };
+
+      var item = {
+        'key-0': 'value-0',
+        'key-1': 'value-1',
+        'key-2': 12345
+      };
+
+      var expectedQuery = {
+        TableName: 'Name-Of-The-Table',
+        Item: {
+          'key-0': { S: 'value-0' },
+          'key-1': { S: 'value-1' },
+          'key-2': { N: '12345' }
+        }
+      };
+
+      var instance = new EnergyQuery('insert', baseQuery, item);
+
+      instance.getQuery(function(err, query) {
+        if (err) return done(err);
+        expect(query).to.deep.equals(expectedQuery);
+        done();
+      });
+
+    });
+
     it('should return the correct query for "query" operations', function(done) {
       var baseQuery = {
         TableName: 'Name-Of-The-Table'

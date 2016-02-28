@@ -336,32 +336,33 @@ describe('EnergyTable (class)', function() {
         'other-key': 12345
       };
 
-      var expectedDynamoItem = {
-        'some-hash-key': { S: 'some-value' },
-        'some-range-key': { S: 'some-range' },
-        'other-key': { N: '12345' }
+      var expectedQuery = {
+        TableName: 'Table-HashKey-RangeKey',
+        Item: {
+          'some-hash-key': { S: 'some-value' },
+          'some-range-key': { S: 'some-range' },
+          'other-key': { N: '12345' }
+        }
       };
 
-      var stub = sinon.stub(table, 'putDynamoItem', function(dynamoItem, callback) {
-        expect(dynamoItem).to.deep.equals(expectedDynamoItem);
-        callback();
-      });
+      sinon.spy(mocks.connectorMock, 'putItem');
 
       table.putItem(item, function thisCallback(err, result) {
         if (err) return done(err);
-        expect(stub).to.have.been.calledOnce;
-        expect(stub).to.have.been.calledWith(
-          sinon.match(expectedDynamoItem),
+        expect(mocks.connectorMock.putItem).to.have.been.calledOnce;
+        expect(mocks.connectorMock.putItem).to.have.been.calledWith(
+          sinon.match(expectedQuery),
           thisCallback
         );
-        stub.restore();
+        mocks.connectorMock.putItem.restore();
         done();
       });
+
     });
 
   });
 
-  describe('#putDynamoItem(dynamoItem, callback)', function() {
+  describe.skip('#putDynamoItem(dynamoItem, callback)', function() {
 
     var table;
 
@@ -922,25 +923,25 @@ describe('EnergyTable (class)', function() {
         'another-key': 12345
       };
 
-      var expectedDynamoItem = {
-        'some-hash-key': { S: sinon.match.string },
-        'not-the-hash-key': {S: 'a string'},
-        'another-key': { N: '12345' }
+      var expectedQuery = {
+        TableName: 'Table-HashKey',
+        Item: {
+          'some-hash-key': { S: sinon.match.string },
+          'not-the-hash-key': {S: 'a string'},
+          'another-key': { N: '12345' }
+        }
       };
 
-      var stub = sinon.stub(table, 'putDynamoItem', function(dynamoItem, callback) {
-        expect(dynamoItem['some-hash-key']['S']).to.not.be.empty;
-        callback();
-      });
+      sinon.spy(mocks.connectorMock, 'putItem');
 
       table.putItem(item, function thisCallback(err, result) {
         if (err) return done(err);
-        expect(stub).to.have.been.calledOnce;
-        expect(stub).to.have.been.calledWith(
-          sinon.match(expectedDynamoItem),
+        expect(mocks.connectorMock.putItem).to.have.been.calledOnce;
+        expect(mocks.connectorMock.putItem).to.have.been.calledWith(
+          sinon.match(expectedQuery),
           thisCallback
         );
-        stub.restore();
+        mocks.connectorMock.putItem.restore();
         done();
       });
 
