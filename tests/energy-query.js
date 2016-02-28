@@ -14,7 +14,7 @@ describe('EnergyQuery (class)', function() {
 
   describe('#getQuery()', function() {
 
-    it('should return the correct query for "query" operations', function() {
+    it('should return the correct query for "query" operations', function(done) {
       var baseQuery = {
         TableName: 'Name-Of-The-Table'
       };
@@ -46,10 +46,15 @@ describe('EnergyQuery (class)', function() {
 
       var instance = new EnergyQuery('query', baseQuery, queryDoc);
 
-      expect(instance.getQuery()).to.deep.equals(expectedQuery);
+      instance.getQuery(function(err, query) {
+        if (err) return done(err);
+        expect(query).to.deep.equals(expectedQuery);
+        done();
+      });
+
     });
 
-    it('should return the correct query for "scan" operations', function() {
+    it('should return the correct query for "scan" operations', function(done) {
       var baseQuery = {
         TableName: 'Name-Of-The-Table'
       };
@@ -81,10 +86,15 @@ describe('EnergyQuery (class)', function() {
 
       var instance = new EnergyQuery('scan', baseQuery, queryDoc);
 
-      expect(instance.getQuery()).to.deep.equals(expectedQuery);
+      instance.getQuery(function(err, query) {
+        if (err) return done(err);
+        expect(query).to.deep.equals(expectedQuery);
+        done();
+      });
+
     });
 
-    it('should return the correct query for "delete" operations', function() {
+    it('should return the correct query for "delete" operations', function(done) {
       var baseQuery = {
         TableName: 'Name-Of-The-Table'
       };
@@ -130,10 +140,15 @@ describe('EnergyQuery (class)', function() {
         'key-1'
       );
 
-      expect(instance.getQuery()).to.deep.equals(expectedQuery);
+      instance.getQuery(function(err, query) {
+        if (err) return done(err);
+        expect(query).to.deep.equals(expectedQuery);
+        done();
+      });
+
     });
 
-    it('should return the correct query for "update" operations', function() {
+    it('should return the correct query for "update" operations', function(done) {
       var baseQuery = {
         TableName: 'Name-Of-The-Table'
       };
@@ -194,7 +209,12 @@ describe('EnergyQuery (class)', function() {
         'key-1'
       );
 
-      expect(instance.getUpdateQuery(updateDoc)).to.deep.equals(expectedQuery);
+      instance.getUpdateQuery(updateDoc, function(err, query) {
+        if (err) return done(err);
+        expect(query).to.deep.equals(expectedQuery);
+        done();
+      });
+
     });
   });
 });
@@ -250,4 +270,3 @@ describe('EnergyQuery (module)', function() {
   );
 
 });
-
