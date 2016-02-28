@@ -717,7 +717,8 @@ describe('EnergyTable (class)', function() {
       });
     });
 
-    it('should call the update method on the connector with the correct query',
+    it('should call the update method on the connector if the query ' +
+      'contains update operators',
       function(done) {
 
         var doc = {
@@ -778,6 +779,67 @@ describe('EnergyTable (class)', function() {
             sinon.match.func
           );
           mocks.connectorMock.updateItem.restore();
+          done();
+        });
+
+      }
+    );
+
+    it('should call the putItem method on the connector if the query ' +
+      'doesn\'t contain any update operators (replace item)',
+      function(done) {
+
+        var doc = {
+          'some-hash-key': 'some-value-0',
+          'some-range-key': 'some-value-1',
+          'some-key-2': 11111,
+        };
+
+        var updateDoc = {
+          'some-hash-key': 'some-value-0',
+          'some-range-key': 'some-value-1',
+          'some-key-0': 'random-string',
+          'some-key-1': {
+            'nested-key': 'nested-value'
+          },
+          'some-key-2': 33333,
+        };
+
+        var expectedQuery = {
+          TableName: 'Table-HashKey-RangeKey',
+          Item: {
+            'some-hash-key': {S: 'some-value-0'},
+            'some-range-key': {S: 'some-value-1'},
+            'some-key-0': {S: 'random-string'},
+            'some-key-1': {M: {
+              'nested-key': {S: 'nested-value'}
+            }},
+            'some-key-2': {N: '33333'},
+          },
+          ExpressionAttributeNames: {
+            '#k0': 'some-hash-key',
+            '#k1': 'some-range-key',
+            '#k2': 'some-key-2',
+          },
+          ExpressionAttributeValues: {
+            ':v0': {S: 'some-value-0'},
+            ':v1': {S: 'some-value-1'},
+            ':v2': {N: '11111'},
+          },
+          ConditionExpression:
+            '#k0 = :v0 AND #k1 = :v1 AND #k2 = :v2',
+        };
+
+        sinon.spy(mocks.connectorMock, 'putItem');
+
+        tableHashRangeKey.update(doc, updateDoc, function(err, result) {
+          if (err) return done(err);
+          expect(mocks.connectorMock.putItem).to.have.been.calledOnce;
+          expect(mocks.connectorMock.putItem).to.have.been.calledWith(
+            sinon.match(expectedQuery),
+            sinon.match.func
+          );
+          mocks.connectorMock.putItem.restore();
           done();
         });
 

@@ -246,6 +246,58 @@ describe('EnergyQuery (class)', function() {
       });
 
     });
+
+    it('should return the correct query for "replace" operations', function(done) {
+      var baseQuery = {
+        TableName: 'Name-Of-The-Table'
+      };
+
+      var queryDoc = {
+        'key-0': 'value-0',
+        'key-1': 98765,
+        'key-2': {'$gt': 12345},
+      };
+
+      var updateDoc = {
+        'key-0': 'value-0-new',
+        'key-1': 55555,
+        'key-2': 99999,
+      };
+
+      var expectedQuery = {
+        TableName: 'Name-Of-The-Table',
+        Item: {
+          'key-0': {S: 'value-0-new'},
+          'key-1': {N: '55555'},
+          'key-2': {N: '99999'},
+        },
+        ExpressionAttributeNames: {
+          '#k0': 'key-0',
+          '#k1': 'key-1',
+          '#k2': 'key-2',
+        },
+        ExpressionAttributeValues: {
+          ':v0': {S: 'value-0'},
+          ':v1': {N: '98765'},
+          ':v2': {N: '12345'},
+        },
+        ConditionExpression:
+          '#k0 = :v0 AND #k1 = :v1 AND #k2 > :v2',
+      };
+
+      var instance = new EnergyQuery(
+        'replace',
+        baseQuery,
+        queryDoc
+      );
+
+      instance.getConditionalReplaceQuery(updateDoc, function(err, query) {
+        if (err) return done(err);
+        expect(query).to.deep.equals(expectedQuery);
+        done();
+      });
+
+    });
   });
 });
 
