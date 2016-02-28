@@ -1,32 +1,18 @@
 var chai = require('chai');
 var expect = chai.expect;
+var sinon = require('sinon');
+var sinonChai = require('sinon-chai');
+chai.use(sinonChai);
+
 var energyDB = require('../lib/energy-db');
 var EnergyDB = energyDB.EnergyDB;
 var DynamoDB = require('aws-sdk').DynamoDB;
 var EnergyTable = require('../lib/energy-table').EnergyTable;
 
-var sinon = require('sinon');
-var sinonChai = require('sinon-chai');
-chai.use(sinonChai);
-
-var dynamoDBMock = {
-  describeTable: sinon.spy(function(tableName, callback) {
-    var tableInfo = {
-      Table: {
-        TableName: tableName,
-        KeySchema: [
-          { AttributeName: 'some-hash-key', KeyType: 'HASH' },
-        ],
-        AttributeDefinitions: [
-          { AttributeName: 'some-hash-key', AttributeType: 'S' },
-        ]
-      }
-    };
-    return callback(null, tableInfo);
-  })
-};
+var dynamoDBMock = require('./fixtures/table-mocks').connectorMock;
 
 describe('energy-db', function() {
+
   describe('#connect(settings, callback)', function() {
 
     it('should pass an EnergyDB instance to the callback', function(done) {
@@ -47,29 +33,35 @@ describe('energy-db', function() {
     });
 
   });
+
 });
 
 describe('EnergyDB', function() {
 
+  var sandbox = sinon.sandbox.create();
+
+  afterEach(function() {
+    sandbox.restore();
+  });
+
   describe('#getConnector()', function() {
+
     it('should return the stored connector', function() {
       var db = new EnergyDB({}, dynamoDBMock);
       var connector = db.getConnector();
       expect(connector).to.equals(dynamoDBMock);
     });
+
   });
 
   describe('#describeTable(tableName, callback)', function() {
 
-    afterEach(function() {
-      dynamoDBMock.describeTable.reset();
-    });
-
     it('should forward the request to DynamoDB with the expected query format', function(done) {
-
       var db = new EnergyDB({}, dynamoDBMock);
-      var tableName = 'Table-Name';
+      var tableName = 'Table-HashKey';
       var expectedQuery = {TableName: tableName};
+
+      sandbox.spy(dynamoDBMock, 'describeTable');
 
       db.describeTable(tableName, function thisCallback(err, tableInfo) {
         if (err) return done(err);
@@ -81,29 +73,33 @@ describe('EnergyDB', function() {
         done();
       });
     });
+
   });
 
   describe('#table(tableName, callback)', function() {
 
     it('should pass an EnergyTable instance to the callback', function(done) {
       var db = new EnergyDB({}, dynamoDBMock);
-      db.table('Table-Name', function(err, table) {
+      db.table('Table-HashKey', function(err, table) {
         if (err) return done(err);
         expect(table).to.be.an.instanceOf(EnergyTable);
         done();
       });
     });
+
   });
 
   describe('#collection(collectionName, callback)', function() {
 
     it('should work exactly like the table method (alias)', function(done) {
       var db = new EnergyDB({}, dynamoDBMock);
-      db.collection('Table-Name', function(err, table) {
+      db.collection('Table-HashKey', function(err, table) {
         if (err) return done(err);
         expect(table).to.be.an.instanceOf(EnergyTable);
         done();
       });
     });
+
   });
+
 });
