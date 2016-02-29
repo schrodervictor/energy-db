@@ -1,6 +1,6 @@
 {
   "name": "energy-db",
-  "version": "v0.0.2",
+  "version": "v0.0.3",
   "description": "a sane and easy to use wrapper around AWS DynamoDB",
   "keywords": [
     "dynamodb",

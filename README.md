@@ -52,6 +52,8 @@ db.table('Your-Table-Name', function(err, table) {
   table.query(doc, callback);
   // or
   table.delete(doc, callback);
+  // or
+  table.update(doc, update, callback);
 });
 
 ```
@@ -92,5 +94,16 @@ pull-request. Only PR's with tests will be considered.
 
 ## Releases
 
-* 0.0.1 Initial alpha release
+* 0.0.3:
+  * adds support to update and replace operations
+  * new structure for unit tests folder
+  * better code organization
+  * EnergyQuery is now EnergyQueryFactory
+  * insert queries now uses EnergyQueryFactory as well
 
+* 0.0.2:
+  * bugfix with new dynamo-doc version
+
+* 0.0.1
+  * Initial alpha release
+  * support to query, insert and delete operations
