@@ -43,6 +43,6 @@
     "sinon-chai": "^2.8.0"
   },
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha tests/*"
+    "test": "./node_modules/mocha/bin/mocha --recursive \"tests/**/*.test.js\""
   }
 }

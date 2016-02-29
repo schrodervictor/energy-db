@@ -6,11 +6,11 @@ var sinonChai = require('sinon-chai');
 var expect = chai.expect;
 chai.use(sinonChai);
 
-var energyQuery = require('../lib/energy-query');
+var energyQuery = require('../../lib/energy-query');
 
 describe('EnergyQuery (class)', function() {
 
-  var EnergyQuery = require('../lib/energy-query').EnergyQuery;
+  var EnergyQuery = energyQuery.EnergyQuery;
 
   describe('#getQuery()', function() {
 

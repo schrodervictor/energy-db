@@ -4,12 +4,12 @@ var sinon = require('sinon');
 var sinonChai = require('sinon-chai');
 chai.use(sinonChai);
 
-var energyDB = require('../lib/energy-db');
+var energyDB = require('../../lib/energy-db');
 var EnergyDB = energyDB.EnergyDB;
 var DynamoDB = require('aws-sdk').DynamoDB;
-var EnergyTable = require('../lib/energy-table').EnergyTable;
+var EnergyTable = require('../../lib/energy-table').EnergyTable;
 
-var dynamoDBMock = require('./fixtures/table-mocks').connectorMock;
+var dynamoDBMock = require('../fixtures/table-mocks').connectorMock;
 
 describe('energy-db', function() {
 

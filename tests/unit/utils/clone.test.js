@@ -1,5 +1,5 @@
 var expect = require('chai').expect;
-var simpleClone = require('../../lib/utils/clone').simpleClone;
+var simpleClone = require('../../../lib/utils/clone').simpleClone;
 
 describe('simpleClone(obj)', function() {
   it('should return a simple clone (one level) of an object', function() {

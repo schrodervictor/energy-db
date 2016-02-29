@@ -4,10 +4,10 @@ var sinonChai = require('sinon-chai');
 var expect = chai.expect;
 chai.use(sinonChai);
 
-var mocks = require('./fixtures/table-mocks');
+var mocks = require('../fixtures/table-mocks');
 
-var energyTable = require('../lib/energy-table');
-var EnergyTable = require('../lib/energy-table').EnergyTable;
+var energyTable = require('../../lib/energy-table');
+var EnergyTable = require('../../lib/energy-table').EnergyTable;
 
 describe('EnergyTable (module)', function() {
 
