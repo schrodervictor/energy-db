@@ -7,18 +7,29 @@ var expect = chai.expect;
 chai.use(sinonChai);
 
 var energyQuery = require('../../lib/energy-query');
+var EnergyTable = require('../../lib/energy-table').EnergyTable;
+var mocks = require('../fixtures/table-mocks');
 
 describe('EnergyQuery (class)', function() {
 
-  var EnergyQuery = energyQuery.EnergyQuery;
+  var EnergyQueryFactory = energyQuery.EnergyQueryFactory;
+
+  var table;
+  var tableHashAndRange;
+
+  before(function(done) {
+    table = new EnergyTable(mocks.dbMock, 'Table-HashKey');
+    table.init(done);
+  });
+
+  before(function(done) {
+    tableHashAndRange = new EnergyTable(mocks.dbMock, 'Table-HashKey-RangeKey');
+    tableHashAndRange.init(done);
+  });
 
   describe('#getQuery()', function() {
 
     it('should return the correct query for "insert" operations', function(done) {
-      var baseQuery = {
-        TableName: 'Name-Of-The-Table'
-      };
-
       var item = {
         'key-0': 'value-0',
         'key-1': 'value-1',
@@ -26,7 +37,7 @@ describe('EnergyQuery (class)', function() {
       };
 
       var expectedQuery = {
-        TableName: 'Name-Of-The-Table',
+        TableName: 'Table-HashKey',
         Item: {
           'key-0': { S: 'value-0' },
           'key-1': { S: 'value-1' },
@@ -34,9 +45,9 @@ describe('EnergyQuery (class)', function() {
         }
       };
 
-      var instance = new EnergyQuery('insert', baseQuery, item);
+      var instance = new EnergyQueryFactory(table);
 
-      instance.getQuery(function(err, query) {
+      instance.getInsertQuery(item, function(err, query) {
         if (err) return done(err);
         expect(query).to.deep.equals(expectedQuery);
         done();
@@ -45,11 +56,7 @@ describe('EnergyQuery (class)', function() {
     });
 
     it('should return the correct query for "query" operations', function(done) {
-      var baseQuery = {
-        TableName: 'Name-Of-The-Table'
-      };
-
-      var queryDoc = {
+      var doc = {
         'key-0': 'value-0',
         'key-1': {'$gte': 12345},
         'key-2': {
@@ -58,7 +65,7 @@ describe('EnergyQuery (class)', function() {
       };
 
       var expectedQuery = {
-        TableName: 'Name-Of-The-Table',
+        TableName: 'Table-HashKey',
         ExpressionAttributeNames: {
           '#k0': 'key-0',
           '#k1': 'key-1',
@@ -74,9 +81,9 @@ describe('EnergyQuery (class)', function() {
         KeyConditionExpression: '#k0 = :v0 AND #k1 >= :v1 AND #k2 = :v2'
       };
 
-      var instance = new EnergyQuery('query', baseQuery, queryDoc);
+      var instance = new EnergyQueryFactory(table);
 
-      instance.getQuery(function(err, query) {
+      instance.getQuery(doc, function(err, query) {
         if (err) return done(err);
         expect(query).to.deep.equals(expectedQuery);
         done();
@@ -85,11 +92,7 @@ describe('EnergyQuery (class)', function() {
     });
 
     it('should return the correct query for "scan" operations', function(done) {
-      var baseQuery = {
-        TableName: 'Name-Of-The-Table'
-      };
-
-      var queryDoc = {
+      var doc = {
         'key-0': 'value-0',
         'key-1': {'$gte': 12345},
         'key-2': {
@@ -98,7 +101,7 @@ describe('EnergyQuery (class)', function() {
       };
 
       var expectedQuery = {
-        TableName: 'Name-Of-The-Table',
+        TableName: 'Table-HashKey',
         ExpressionAttributeNames: {
           '#k0': 'key-0',
           '#k1': 'key-1',
@@ -114,9 +117,9 @@ describe('EnergyQuery (class)', function() {
         FilterExpression: '#k0 = :v0 AND #k1 >= :v1 AND #k2 = :v2'
       };
 
-      var instance = new EnergyQuery('scan', baseQuery, queryDoc);
+      var instance = new EnergyQueryFactory(table);
 
-      instance.getQuery(function(err, query) {
+      instance.getScanQuery(doc, function(err, query) {
         if (err) return done(err);
         expect(query).to.deep.equals(expectedQuery);
         done();
@@ -125,13 +128,9 @@ describe('EnergyQuery (class)', function() {
     });
 
     it('should return the correct query for "delete" operations', function(done) {
-      var baseQuery = {
-        TableName: 'Name-Of-The-Table'
-      };
-
-      var queryDoc = {
-        'key-0': 'value-0',
-        'key-1': 98765,
+      var doc = {
+        'some-hash-key': 'value-0',
+        'some-range-key': 'value-1',
         'key-2': {'$gte': 12345},
         'key-3': {
           'sub-key': 'random-value'
@@ -139,20 +138,20 @@ describe('EnergyQuery (class)', function() {
       };
 
       var expectedQuery = {
-        TableName: 'Name-Of-The-Table',
+        TableName: 'Table-HashKey-RangeKey',
         Key: {
-          'key-0': {S: 'value-0'},
-          'key-1': {N: '98765'}
+          'some-hash-key': {S: 'value-0'},
+          'some-range-key': {S: 'value-1'},
         },
         ExpressionAttributeNames: {
-          '#k0': 'key-0',
-          '#k1': 'key-1',
+          '#k0': 'some-hash-key',
+          '#k1': 'some-range-key',
           '#k2': 'key-2',
           '#k3': 'key-3'
         },
         ExpressionAttributeValues: {
           ':v0': {S: 'value-0'},
-          ':v1': {N: '98765'},
+          ':v1': {S: 'value-1'},
           ':v2': {N: '12345'},
           ':v3': {M: {
             'sub-key': {S: 'random-value'}
@@ -162,15 +161,9 @@ describe('EnergyQuery (class)', function() {
           '#k0 = :v0 AND #k1 = :v1 AND #k2 >= :v2 AND #k3 = :v3'
       };
 
-      var instance = new EnergyQuery(
-        'delete',
-        baseQuery,
-        queryDoc,
-        'key-0',
-        'key-1'
-      );
+      var instance = new EnergyQueryFactory(tableHashAndRange);
 
-      instance.getQuery(function(err, query) {
+      instance.getDeleteQuery(doc, function(err, query) {
         if (err) return done(err);
         expect(query).to.deep.equals(expectedQuery);
         done();
@@ -179,17 +172,15 @@ describe('EnergyQuery (class)', function() {
     });
 
     it('should return the correct query for "update" operations', function(done) {
-      var baseQuery = {
-        TableName: 'Name-Of-The-Table'
-      };
-
-      var queryDoc = {
-        'key-0': 'value-0',
+      var doc = {
+        'some-hash-key': 'value-0',
+        'some-range-key': 'value-1',
+        'key-0': 'value-2',
         'key-1': 98765,
         'key-2': 12345,
       };
 
-      var updateDoc = {
+      var update = {
         '$set': {
           'key-0': 'value-0-new',
           'key-1': 11111,
@@ -203,43 +194,41 @@ describe('EnergyQuery (class)', function() {
       };
 
       var expectedQuery = {
-        TableName: 'Name-Of-The-Table',
+        TableName: 'Table-HashKey-RangeKey',
         Key: {
-          'key-0': {S: 'value-0'},
-          'key-1': {N: '98765'}
+          'some-hash-key': {S: 'value-0'},
+          'some-range-key': {S: 'value-1'},
         },
         ExpressionAttributeNames: {
-          '#k0': 'key-0',
-          '#k1': 'key-1',
-          '#k2': 'key-2',
-          '#k3': 'key-0',
-          '#k4': 'key-1',
-          '#k5': 'key-2',
-          '#k6': 'key-3',
+          '#k0': 'some-hash-key',
+          '#k1': 'some-range-key',
+          '#k2': 'key-0',
+          '#k3': 'key-1',
+          '#k4': 'key-2',
+          '#k5': 'key-0',
+          '#k6': 'key-1',
+          '#k7': 'key-2',
+          '#k8': 'key-3',
         },
         ExpressionAttributeValues: {
           ':v0': {S: 'value-0'},
-          ':v1': {N: '98765'},
-          ':v2': {N: '12345'},
-          ':v3': {S: 'value-0-new'},
-          ':v4': {N: '11111'},
-          ':v5': {N: '3'},
+          ':v1': {S: 'value-1'},
+          ':v2': {S: 'value-2'},
+          ':v3': {N: '98765'},
+          ':v4': {N: '12345'},
+          ':v5': {S: 'value-0-new'},
+          ':v6': {N: '11111'},
+          ':v7': {N: '3'},
         },
         ConditionExpression:
-          '#k0 = :v0 AND #k1 = :v1 AND #k2 = :v2',
+          '#k0 = :v0 AND #k1 = :v1 AND #k2 = :v2 AND #k3 = :v3 AND #k4 = :v4',
         UpdateExpression:
-          'SET #k3 = :v3, #k4 = :v4 ADD #k5 :v5 REMOVE #k6'
+          'SET #k5 = :v5, #k6 = :v6 ADD #k7 :v7 REMOVE #k8'
       };
 
-      var instance = new EnergyQuery(
-        'update',
-        baseQuery,
-        queryDoc,
-        'key-0',
-        'key-1'
-      );
+      var instance = new EnergyQueryFactory(tableHashAndRange);
 
-      instance.getUpdateQuery(updateDoc, function(err, query) {
+      instance.getUpdateQuery(doc, update, function(err, query) {
         if (err) return done(err);
         expect(query).to.deep.equals(expectedQuery);
         done();
@@ -248,24 +237,20 @@ describe('EnergyQuery (class)', function() {
     });
 
     it('should return the correct query for "replace" operations', function(done) {
-      var baseQuery = {
-        TableName: 'Name-Of-The-Table'
-      };
-
-      var queryDoc = {
+      var doc = {
         'key-0': 'value-0',
         'key-1': 98765,
         'key-2': {'$gt': 12345},
       };
 
-      var updateDoc = {
+      var replacement = {
         'key-0': 'value-0-new',
         'key-1': 55555,
         'key-2': 99999,
       };
 
       var expectedQuery = {
-        TableName: 'Name-Of-The-Table',
+        TableName: 'Table-HashKey',
         Item: {
           'key-0': {S: 'value-0-new'},
           'key-1': {N: '55555'},
@@ -285,13 +270,9 @@ describe('EnergyQuery (class)', function() {
           '#k0 = :v0 AND #k1 = :v1 AND #k2 > :v2',
       };
 
-      var instance = new EnergyQuery(
-        'replace',
-        baseQuery,
-        queryDoc
-      );
+      var instance = new EnergyQueryFactory(table);
 
-      instance.getConditionalReplaceQuery(updateDoc, function(err, query) {
+      instance.getReplaceQuery(doc, replacement, function(err, query) {
         if (err) return done(err);
         expect(query).to.deep.equals(expectedQuery);
         done();

@@ -329,7 +329,7 @@ describe('EnergyTable (class)', function() {
       });
     });
 
-    it('should redirect the call to putDynamoItem, with a transformed item', function(done) {
+    it('should call putItem on the connector with the correct query', function(done) {
       var item = {
         'some-hash-key': 'some-value',
         'some-range-key': 'some-range',
@@ -706,11 +706,11 @@ describe('EnergyTable (class)', function() {
 
   });
 
-  describe('#update(doc, callback)', function() {
+  describe('#update(doc, updates, callback)', function() {
 
     var tableHashRangeKey;
 
-    beforeEach(function(done) {
+    before(function(done) {
       tableHashRangeKey = new EnergyTable(mocks.dbMock, 'Table-HashKey-RangeKey');
       tableHashRangeKey.init(function(err, table) {
         return done(err);
@@ -727,7 +727,7 @@ describe('EnergyTable (class)', function() {
           'some-key-2': 11111,
         };
 
-        var updateDoc = {
+        var update = {
           '$inc': {
             'some-key-2': 33333
           },
@@ -771,7 +771,7 @@ describe('EnergyTable (class)', function() {
 
         sinon.spy(mocks.connectorMock, 'updateItem');
 
-        tableHashRangeKey.update(doc, updateDoc, function(err, result) {
+        tableHashRangeKey.update(doc, update, function(err, result) {
           if (err) return done(err);
           expect(mocks.connectorMock.updateItem).to.have.been.calledOnce;
           expect(mocks.connectorMock.updateItem).to.have.been.calledWith(
