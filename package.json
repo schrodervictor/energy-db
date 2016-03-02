@@ -1,12 +1,16 @@
 {
   "name": "energy-db",
-  "version": "v0.0.3",
+  "version": "v0.0.4",
   "description": "a sane and easy to use wrapper around AWS DynamoDB",
   "keywords": [
+    "DynamoDB",
     "dynamodb",
     "dynamo-db",
     "energy-db",
     "dynamo-doc",
+    "database",
+    "NoSQL",
+    "amazon web services",
     "aws"
   ],
   "author": {
