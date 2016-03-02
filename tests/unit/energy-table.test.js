@@ -454,6 +454,32 @@ describe('EnergyTable (class)', function() {
       });
     });
 
+    it('should call the scan method on the connector with a get-all items ' +
+      'request, when the query is an empty document',
+      function(done) {
+
+        var expectedQuery = {
+          TableName: 'Table-HashKey',
+        };
+
+        sinon.stub(mocks.connectorMock, 'scan', function(query, callback) {
+          expect(query).to.deep.equals(expectedQuery);
+          callback();
+        });
+
+        tableHashKey.query({}, function thisCallback(err, result) {
+          if (err) return done(err);
+          expect(mocks.connectorMock.scan).to.have.been.calledOnce;
+          expect(mocks.connectorMock.scan).to.have.been.calledWith(
+            sinon.match(expectedQuery),
+            sinon.match.func
+          );
+          mocks.connectorMock.scan.restore();
+          done();
+        });
+      }
+    );
+
     it('should call the query method on the connector, when the hash key is specified', function(done) {
       var doc = {
         'some-hash-key': 'some-value',

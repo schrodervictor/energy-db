@@ -127,6 +127,23 @@ describe('EnergyQuery (class)', function() {
 
     });
 
+    it('should return the correct query for full "scan" operations', function(done) {
+      var doc = {};
+
+      var expectedQuery = {
+        TableName: 'Table-HashKey',
+      };
+
+      var instance = new EnergyQueryFactory(table);
+
+      instance.getScanQuery(doc, function(err, query) {
+        if (err) return done(err);
+        expect(query).to.deep.equals(expectedQuery);
+        done();
+      });
+
+    });
+
     it('should return the correct query for "delete" operations', function(done) {
       var doc = {
         'some-hash-key': 'value-0',
