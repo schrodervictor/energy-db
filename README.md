@@ -94,6 +94,11 @@ pull-request. Only PR's with tests will be considered.
 
 ## Releases
 
+* 0.0.5:
+
+  * adds final validation to the query factory to prevent invalid syntax and
+    the use of deprecated operators
+
 * 0.0.4:
 
   * adds full-scan functionality
