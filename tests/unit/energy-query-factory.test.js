@@ -6,11 +6,11 @@ var sinonChai = require('sinon-chai');
 var expect = chai.expect;
 chai.use(sinonChai);
 
-var energyQuery = require('../../lib/energy-query');
+var energyQuery = require('../../lib/energy-query-factory');
 var EnergyTable = require('../../lib/energy-table').EnergyTable;
 var mocks = require('../fixtures/table-mocks');
 
-describe('EnergyQuery (class)', function() {
+describe('EnergyQueryFactory (class)', function() {
 
   var EnergyQueryFactory = energyQuery.EnergyQueryFactory;
 
@@ -678,7 +678,7 @@ describe('EnergyQuery (class)', function() {
   });
 });
 
-describe('EnergyQuery (module)', function() {
+describe('EnergyQueryFactory (module)', function() {
 
   describe('#getExpressionFragment(expressionName, expressionValue, value)',
     function() {
