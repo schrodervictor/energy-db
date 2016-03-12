@@ -17,12 +17,12 @@ describe('EnergyQuery (class)', function() {
   var table;
   var tableHashAndRange;
 
-  before(function(done) {
+  beforeEach(function(done) {
     table = new EnergyTable(mocks.dbMock, 'Table-HashKey');
     table.init(done);
   });
 
-  before(function(done) {
+  beforeEach(function(done) {
     tableHashAndRange = new EnergyTable(mocks.dbMock, 'Table-HashKey-RangeKey');
     tableHashAndRange.init(done);
   });
@@ -50,6 +50,75 @@ describe('EnergyQuery (class)', function() {
       instance.getInsertQuery(item, function(err, query) {
         if (err) return done(err);
         expect(query).to.deep.equals(expectedQuery);
+        done();
+      });
+
+    });
+
+    it('should not contain options for other types of query (for insert queries)', function(done) {
+      var item = {
+        'key-0': 'value-0',
+        'key-1': 'value-1',
+        'key-2': 12345
+      };
+
+      var allQueryParams = {
+        'Item': {'key': {S: 'value'}},
+        'TableName': 'STRING',
+        'ConditionExpression': 'STRING',
+        'ExpressionAttributeNames': {'key': 'value'},
+        'ExpressionAttributeValues': {'key': {S: 'value'}},
+        'ReturnConsumedCapacity': 'TOTAL',
+        'ReturnItemCollectionMetrics': 'SIZE',
+        'ReturnValues': 'ALL_NEW',
+        'ConsistentRead': true,
+        'ExclusiveStartKey': {'key': {S: 'value'}},
+        'FilterExpression': 'STRING',
+        'IndexName': 'STRING',
+        'KeyConditionExpression': 'STRING',
+        'Limit': 100,
+        'ProjectionExpression': 'STRING',
+        'ScanIndexForward': true,
+        'Select': 'ALL_ATTRIBUTES',
+        'Segment': 2,
+        'TotalSegments': 4,
+        'Key': {'key': {S: 'value'}},
+        'UpdateExpression': 'STRING',
+
+        // Deprecated operators
+        'Expected': {},
+        'ConditionalOperator': 'AND',
+        'AttributesToGet': {},
+        'ScanFilter': {},
+        'AttributeUpdates': {},
+        'KeyConditions': {},
+        'QueryFilter': {},
+      };
+
+      table.addQueryParams(allQueryParams);
+
+      var instance = new EnergyQueryFactory(table);
+
+      instance.getInsertQuery(item, function(err, query) {
+        if (err) return done(err);
+
+        var allowedParams = new Set([
+          'Item',
+          'TableName',
+          'ConditionExpression',
+          'ExpressionAttributeNames',
+          'ExpressionAttributeValues',
+          'ReturnConsumedCapacity',
+          'ReturnItemCollectionMetrics',
+          'ReturnValues',
+        ]);
+
+        for (var key in allQueryParams) {
+          if (!allowedParams.has(key)) {
+            expect(query).to.not.have.property(key);
+          }
+        }
+
         done();
       });
 
@@ -86,6 +155,82 @@ describe('EnergyQuery (class)', function() {
       instance.getQuery(doc, function(err, query) {
         if (err) return done(err);
         expect(query).to.deep.equals(expectedQuery);
+        done();
+      });
+
+    });
+
+    it('should not contain options for other types of query (for query queries)', function(done) {
+      var doc = {
+        'key-0': 'value-0',
+        'key-1': {'$gte': 12345},
+        'key-2': {
+          'sub-key': 'random-value'
+        }
+      };
+
+      var allQueryParams = {
+        'Item': {'key': {S: 'value'}},
+        'TableName': 'STRING',
+        'ConditionExpression': 'STRING',
+        'ExpressionAttributeNames': {'key': 'value'},
+        'ExpressionAttributeValues': {'key': {S: 'value'}},
+        'ReturnConsumedCapacity': 'TOTAL',
+        'ReturnItemCollectionMetrics': 'SIZE',
+        'ReturnValues': 'ALL_NEW',
+        'ConsistentRead': true,
+        'ExclusiveStartKey': {'key': {S: 'value'}},
+        'FilterExpression': 'STRING',
+        'IndexName': 'STRING',
+        'KeyConditionExpression': 'STRING',
+        'Limit': 100,
+        'ProjectionExpression': 'STRING',
+        'ScanIndexForward': true,
+        'Select': 'ALL_ATTRIBUTES',
+        'Segment': 2,
+        'TotalSegments': 4,
+        'Key': {'key': {S: 'value'}},
+        'UpdateExpression': 'STRING',
+
+        // Deprecated operators
+        'Expected': {},
+        'ConditionalOperator': 'AND',
+        'AttributesToGet': {},
+        'ScanFilter': {},
+        'AttributeUpdates': {},
+        'KeyConditions': {},
+        'QueryFilter': {},
+      };
+
+      table.addQueryParams(allQueryParams);
+
+      var instance = new EnergyQueryFactory(table);
+
+      instance.getQuery(doc, function(err, query) {
+        if (err) return done(err);
+
+        var allowedParams = new Set([
+          'TableName',
+          'ConsistentRead',
+          'ExclusiveStartKey',
+          'ExpressionAttributeNames',
+          'ExpressionAttributeValues',
+          'FilterExpression',
+          'IndexName',
+          'KeyConditionExpression',
+          'Limit',
+          'ProjectionExpression',
+          'ReturnConsumedCapacity',
+          'ScanIndexForward',
+          'Select',
+        ]);
+
+        for (var key in allQueryParams) {
+          if (!allowedParams.has(key)) {
+            expect(query).to.not.have.property(key);
+          }
+        }
+
         done();
       });
 
@@ -144,6 +289,82 @@ describe('EnergyQuery (class)', function() {
 
     });
 
+    it('should not contain options for other types of query (for scan queries)', function(done) {
+      var doc = {
+        'key-0': 'value-0',
+        'key-1': {'$gte': 12345},
+        'key-2': {
+          'sub-key': 'random-value'
+        }
+      };
+
+      var allQueryParams = {
+        'Item': {'key': {S: 'value'}},
+        'TableName': 'STRING',
+        'ConditionExpression': 'STRING',
+        'ExpressionAttributeNames': {'key': 'value'},
+        'ExpressionAttributeValues': {'key': {S: 'value'}},
+        'ReturnConsumedCapacity': 'TOTAL',
+        'ReturnItemCollectionMetrics': 'SIZE',
+        'ReturnValues': 'ALL_NEW',
+        'ConsistentRead': true,
+        'ExclusiveStartKey': {'key': {S: 'value'}},
+        'FilterExpression': 'STRING',
+        'IndexName': 'STRING',
+        'KeyConditionExpression': 'STRING',
+        'Limit': 100,
+        'ProjectionExpression': 'STRING',
+        'ScanIndexForward': true,
+        'Select': 'ALL_ATTRIBUTES',
+        'Segment': 2,
+        'TotalSegments': 4,
+        'Key': {'key': {S: 'value'}},
+        'UpdateExpression': 'STRING',
+
+        // Deprecated operators
+        'Expected': {},
+        'ConditionalOperator': 'AND',
+        'AttributesToGet': {},
+        'ScanFilter': {},
+        'AttributeUpdates': {},
+        'KeyConditions': {},
+        'QueryFilter': {},
+      };
+
+      table.addQueryParams(allQueryParams);
+
+      var instance = new EnergyQueryFactory(table);
+
+      instance.getScanQuery(doc, function(err, query) {
+        if (err) return done(err);
+
+        var allowedParams = new Set([
+          'TableName',
+          'ConsistentRead',
+          'ExclusiveStartKey',
+          'ExpressionAttributeNames',
+          'ExpressionAttributeValues',
+          'FilterExpression',
+          'IndexName',
+          'Limit',
+          'ProjectionExpression',
+          'Segment',
+          'TotalSegments',
+          'ReturnConsumedCapacity',
+          'Select',
+        ]);
+
+        for (var key in allQueryParams) {
+          if (!allowedParams.has(key)) {
+            expect(query).to.not.have.property(key);
+          }
+        }
+
+        done();
+      });
+
+    });
+
     it('should return the correct query for "delete" operations', function(done) {
       var doc = {
         'some-hash-key': 'value-0',
@@ -187,6 +408,79 @@ describe('EnergyQuery (class)', function() {
       });
 
     });
+
+    it('should not contain options for other types of query (for delete queries)', function(done) {
+      var doc = {
+        'some-hash-key': 'value-0',
+        'some-range-key': 'value-1',
+        'key-2': {'$gte': 12345},
+        'key-3': {
+          'sub-key': 'random-value'
+        }
+      };
+
+      var allQueryParams = {
+        'Item': {'key': {S: 'value'}},
+        'TableName': 'STRING',
+        'ConditionExpression': 'STRING',
+        'ExpressionAttributeNames': {'key': 'value'},
+        'ExpressionAttributeValues': {'key': {S: 'value'}},
+        'ReturnConsumedCapacity': 'TOTAL',
+        'ReturnItemCollectionMetrics': 'SIZE',
+        'ReturnValues': 'ALL_NEW',
+        'ConsistentRead': true,
+        'ExclusiveStartKey': {'key': {S: 'value'}},
+        'FilterExpression': 'STRING',
+        'IndexName': 'STRING',
+        'KeyConditionExpression': 'STRING',
+        'Limit': 100,
+        'ProjectionExpression': 'STRING',
+        'ScanIndexForward': true,
+        'Select': 'ALL_ATTRIBUTES',
+        'Segment': 2,
+        'TotalSegments': 4,
+        'Key': {'key': {S: 'value'}},
+        'UpdateExpression': 'STRING',
+
+        // Deprecated operators
+        'Expected': {},
+        'ConditionalOperator': 'AND',
+        'AttributesToGet': {},
+        'ScanFilter': {},
+        'AttributeUpdates': {},
+        'KeyConditions': {},
+        'QueryFilter': {},
+      };
+
+      table.addQueryParams(allQueryParams);
+
+      var instance = new EnergyQueryFactory(table);
+
+      instance.getDeleteQuery(doc, function(err, query) {
+        if (err) return done(err);
+
+        var allowedParams = new Set([
+          'Key',
+          'TableName',
+          'ConditionExpression',
+          'ExpressionAttributeNames',
+          'ExpressionAttributeValues',
+          'ReturnConsumedCapacity',
+          'ReturnItemCollectionMetrics',
+          'ReturnValues',
+        ]);
+
+        for (var key in allQueryParams) {
+          if (!allowedParams.has(key)) {
+            expect(query).to.not.have.property(key);
+          }
+        }
+
+        done();
+      });
+
+    });
+
 
     it('should return the correct query for "update" operations', function(done) {
       var doc = {
@@ -248,6 +542,91 @@ describe('EnergyQuery (class)', function() {
       instance.getUpdateQuery(doc, update, function(err, query) {
         if (err) return done(err);
         expect(query).to.deep.equals(expectedQuery);
+        done();
+      });
+
+    });
+
+    it('should not contain options for other types of query (for update queries)', function(done) {
+      var doc = {
+        'some-hash-key': 'value-0',
+        'some-range-key': 'value-1',
+        'key-0': 'value-2',
+        'key-1': 98765,
+        'key-2': 12345,
+      };
+
+      var update = {
+        '$set': {
+          'key-0': 'value-0-new',
+          'key-1': 11111,
+        },
+        '$inc': {
+          'key-2': 3
+        },
+        '$unset': {
+          'key-3': 1
+        },
+      };
+
+      var allQueryParams = {
+        'Item': {'key': {S: 'value'}},
+        'TableName': 'STRING',
+        'ConditionExpression': 'STRING',
+        'ExpressionAttributeNames': {'key': 'value'},
+        'ExpressionAttributeValues': {'key': {S: 'value'}},
+        'ReturnConsumedCapacity': 'TOTAL',
+        'ReturnItemCollectionMetrics': 'SIZE',
+        'ReturnValues': 'ALL_NEW',
+        'ConsistentRead': true,
+        'ExclusiveStartKey': {'key': {S: 'value'}},
+        'FilterExpression': 'STRING',
+        'IndexName': 'STRING',
+        'KeyConditionExpression': 'STRING',
+        'Limit': 100,
+        'ProjectionExpression': 'STRING',
+        'ScanIndexForward': true,
+        'Select': 'ALL_ATTRIBUTES',
+        'Segment': 2,
+        'TotalSegments': 4,
+        'Key': {'key': {S: 'value'}},
+        'UpdateExpression': 'STRING',
+
+        // Deprecated operators
+        'Expected': {},
+        'ConditionalOperator': 'AND',
+        'AttributesToGet': {},
+        'ScanFilter': {},
+        'AttributeUpdates': {},
+        'KeyConditions': {},
+        'QueryFilter': {},
+      };
+
+      table.addQueryParams(allQueryParams);
+
+      var instance = new EnergyQueryFactory(table);
+
+      instance.getUpdateQuery(doc, update, function(err, query) {
+        if (err) return done(err);
+
+        var allowedParams = new Set([
+          'Key',
+          'TableName',
+          'ConditionExpression',
+          'ExpressionAttributeNames',
+          'ExpressionAttributeValues',
+          'ReturnConsumedCapacity',
+          'ReturnItemCollectionMetrics',
+          'ReturnValues',
+          'UpdateExpression',
+        ]);
+
+        for (var key in allQueryParams) {
+          if (!allowedParams.has(key)) {
+            expect(query).to.not.have.property(key);
+          }
+        }
+
         done();
       });
 
