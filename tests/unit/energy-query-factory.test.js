@@ -47,7 +47,7 @@ describe('EnergyQueryFactory (class)', function() {
 
       var instance = new EnergyQueryFactory(table);
 
-      instance.getInsertQuery(item, function(err, query) {
+      instance.getInsertQuery(item, null, function(err, query) {
         if (err) return done(err);
         expect(query).to.deep.equals(expectedQuery);
         done();
@@ -99,7 +99,7 @@ describe('EnergyQueryFactory (class)', function() {
 
       var instance = new EnergyQueryFactory(table);
 
-      instance.getInsertQuery(item, function(err, query) {
+      instance.getInsertQuery(item, null, function(err, query) {
         if (err) return done(err);
 
         var allowedParams = new Set([
@@ -152,7 +152,7 @@ describe('EnergyQueryFactory (class)', function() {
 
       var instance = new EnergyQueryFactory(table);
 
-      instance.getQuery(doc, function(err, query) {
+      instance.getQuery(doc, null, function(err, query) {
         if (err) return done(err);
         expect(query).to.deep.equals(expectedQuery);
         done();
@@ -206,7 +206,7 @@ describe('EnergyQueryFactory (class)', function() {
 
       var instance = new EnergyQueryFactory(table);
 
-      instance.getQuery(doc, function(err, query) {
+      instance.getQuery(doc, null, function(err, query) {
         if (err) return done(err);
 
         var allowedParams = new Set([
@@ -264,7 +264,7 @@ describe('EnergyQueryFactory (class)', function() {
 
       var instance = new EnergyQueryFactory(table);
 
-      instance.getScanQuery(doc, function(err, query) {
+      instance.getScanQuery(doc, null, function(err, query) {
         if (err) return done(err);
         expect(query).to.deep.equals(expectedQuery);
         done();
@@ -281,7 +281,7 @@ describe('EnergyQueryFactory (class)', function() {
 
       var instance = new EnergyQueryFactory(table);
 
-      instance.getScanQuery(doc, function(err, query) {
+      instance.getScanQuery(doc, null, function(err, query) {
         if (err) return done(err);
         expect(query).to.deep.equals(expectedQuery);
         done();
@@ -335,7 +335,7 @@ describe('EnergyQueryFactory (class)', function() {
 
       var instance = new EnergyQueryFactory(table);
 
-      instance.getScanQuery(doc, function(err, query) {
+      instance.getScanQuery(doc, null, function(err, query) {
         if (err) return done(err);
 
         var allowedParams = new Set([
@@ -401,7 +401,7 @@ describe('EnergyQueryFactory (class)', function() {
 
       var instance = new EnergyQueryFactory(tableHashAndRange);
 
-      instance.getDeleteQuery(doc, function(err, query) {
+      instance.getDeleteQuery(doc, null, function(err, query) {
         if (err) return done(err);
         expect(query).to.deep.equals(expectedQuery);
         done();
@@ -456,7 +456,7 @@ describe('EnergyQueryFactory (class)', function() {
 
       var instance = new EnergyQueryFactory(table);
 
-      instance.getDeleteQuery(doc, function(err, query) {
+      instance.getDeleteQuery(doc, null, function(err, query) {
         if (err) return done(err);
 
         var allowedParams = new Set([
@@ -539,7 +539,7 @@ describe('EnergyQueryFactory (class)', function() {
 
       var instance = new EnergyQueryFactory(tableHashAndRange);
 
-      instance.getUpdateQuery(doc, update, function(err, query) {
+      instance.getUpdateQuery(doc, update, null, function(err, query) {
         if (err) return done(err);
         expect(query).to.deep.equals(expectedQuery);
         done();
@@ -606,7 +606,7 @@ describe('EnergyQueryFactory (class)', function() {
 
       var instance = new EnergyQueryFactory(table);
 
-      instance.getUpdateQuery(doc, update, function(err, query) {
+      instance.getUpdateQuery(doc, update, null, function(err, query) {
         if (err) return done(err);
 
         var allowedParams = new Set([
@@ -668,7 +668,7 @@ describe('EnergyQueryFactory (class)', function() {
 
       var instance = new EnergyQueryFactory(table);
 
-      instance.getReplaceQuery(doc, replacement, function(err, query) {
+      instance.getReplaceQuery(doc, replacement, null, function(err, query) {
         if (err) return done(err);
         expect(query).to.deep.equals(expectedQuery);
         done();
@@ -676,56 +676,4 @@ describe('EnergyQueryFactory (class)', function() {
 
     });
   });
-});
-
-describe('EnergyQueryFactory (module)', function() {
-
-  describe('#getExpressionFragment(expressionName, expressionValue, value)',
-    function() {
-
-      it('should convert to the respective expression fragment', function() {
-
-        var f = function (test) {
-          return energyQuery.getExpressionFragment('#k0', ':v0', test);
-        }
-
-        expect(f('some string')).to.equals('#k0 = :v0');
-        expect(f(12345)).to.equals('#k0 = :v0');
-        expect(f({key: 'random object'})).to.equals('#k0 = :v0');
-
-        expect(f({$eq: 12345})).to.equals('#k0 = :v0');
-        expect(f({$gt: 12345})).to.equals('#k0 > :v0');
-        expect(f({$gte: 12345})).to.equals('#k0 >= :v0');
-        expect(f({$lt: 12345})).to.equals('#k0 < :v0');
-        expect(f({$lte: 12345})).to.equals('#k0 <= :v0');
-
-      });
-
-    }
-  );
-
-  describe('#getExpressionValue(value)',
-    function() {
-
-      it('should convert to the respective expression fragment', function() {
-
-        var f = energyQuery.getExpressionValue;
-
-        expect(f('some string')).to.deep.equals({S: 'some string'});
-        expect(f(12345)).to.deep.equals({N: '12345'});
-        expect(f({key: 'random object'})).to.deep.equals(
-          {M: {key: {S: 'random object'}}}
-        );
-
-        expect(f({$eq: 12345})).to.deep.equals({N: '12345'});
-        expect(f({$gt: 12345})).to.deep.equals({N: '12345'});
-        expect(f({$gte: 12345})).to.deep.equals({N: '12345'});
-        expect(f({$lt: 12345})).to.deep.equals({N: '12345'});
-        expect(f({$lte: 12345})).to.deep.equals({N: '12345'});
-
-      });
-
-    }
-  );
-
 });
