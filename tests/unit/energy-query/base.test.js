@@ -5,6 +5,63 @@ var base = require('../../../lib/energy-query/base');
 
 describe('BaseQueryBuilder', function() {
 
+  describe('#getQueryBase()', function() {
+
+    it('should return an object that is a clone of the table\'s query base',
+      function() {
+        var builder = new (base.BaseQueryBuilder)();
+        var queryBase = {
+          TableName: 'Table-Name-Here',
+        };
+        builder.configure({
+          queryBase: queryBase,
+          hashKey: 'hash-key'
+        });
+
+        var query = builder.getQueryBase();
+
+        expect(query).to.not.equals(queryBase);
+        expect(query).to.deep.equals(queryBase);
+      }
+    );
+
+    it('should combine the query base and query options, with preference to ' +
+      'parameters in the query options object',
+      function () {
+        var builder = new (base.BaseQueryBuilder)();
+
+        var queryBase = {
+          TableName: 'Table-Name-Here',
+          ConsistentRead: false
+        };
+
+        var options = {
+          ConsistentRead: true,
+          ReturnConsumedCapacity: true
+        };
+
+        var expectedQuery = {
+          TableName: 'Table-Name-Here',
+          ConsistentRead: true,
+          ReturnConsumedCapacity: true
+        };
+
+        builder.configure({
+          queryBase: queryBase,
+          options: options,
+          hashKey: 'hash-key'
+        });
+
+        var query = builder.getQueryBase();
+
+        expect(query).to.not.equals(queryBase);
+        expect(query).to.not.equals(options);
+        expect(query).to.deep.equals(expectedQuery);
+      }
+    );
+
+  });
+
   describe('#getExpressionFragment(expressionName, expressionValue, value)',
     function() {
 
