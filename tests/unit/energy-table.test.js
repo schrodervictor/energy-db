@@ -872,6 +872,82 @@ describe('EnergyTable (class)', function() {
       }
     );
 
+    it('should map the returned "Attributes" to a normal js object',
+      function(done) {
+        var doc = {
+          'some-hash-key': 'some-value-0',
+          'some-range-key': 'some-value-1',
+          'some-key-2': 11111,
+        };
+
+        var update = {
+          '$inc': {
+            'some-key-2': 33333
+          },
+        };
+
+        var options = {
+          ReturnValues: 'ALL_OLD'
+        };
+
+        var expectedQuery = {
+          TableName: 'Table-HashKey-RangeKey',
+          Key: {
+            'some-hash-key': {S: 'some-value-0'},
+            'some-range-key': {S: 'some-value-1'}
+          },
+          ExpressionAttributeNames: {
+            '#k0': 'some-hash-key',
+            '#k1': 'some-range-key',
+            '#k2': 'some-key-2',
+            '#k3': 'some-key-2',
+          },
+          ExpressionAttributeValues: {
+            ':v0': {S: 'some-value-0'},
+            ':v1': {S: 'some-value-1'},
+            ':v2': {N: '11111'},
+            ':v3': {N: '33333'},
+          },
+          ConditionExpression:
+            '#k0 = :v0 AND #k1 = :v1 AND #k2 = :v2',
+          UpdateExpression:
+            'ADD #k3 :v3',
+          ReturnValues: 'ALL_OLD'
+        };
+
+        var returnValue = {
+          Attributes: {
+            'some-hash-key': {S: 'some-value-0'},
+            'some-range-key': {S: 'some-value-1'},
+            'some-key-2': {N: '11111'},
+          }
+        };
+
+        var expectedResult = {
+          'some-hash-key': 'some-value-0',
+          'some-range-key': 'some-value-1',
+          'some-key-2': 11111,
+        };
+
+        sinon.stub(mocks.connectorMock, 'updateItem')
+          .withArgs(expectedQuery, sinon.match.func)
+          .callsArgWith(1, null, returnValue);
+
+        tableHashRangeKey.update(doc, update, options, function(err, result) {
+          if (err) return done(err);
+          expect(mocks.connectorMock.updateItem).to.have.been.calledOnce;
+          expect(mocks.connectorMock.updateItem).to.have.been.calledWith(
+            sinon.match(expectedQuery),
+            sinon.match.func
+          );
+          expect(result).to.deep.equals(expectedResult);
+          mocks.connectorMock.updateItem.restore();
+          done();
+        });
+
+      }
+    );
+
   });
 
   describe('#delete(doc, callback)', function() {
