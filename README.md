@@ -47,13 +47,13 @@ db.table('Your-Table-Name', function(err, table) {
     'key-1': 12345
   };
 
-  table.putItem(doc, callback);
+  table.putItem(doc[, options], callback);
   // or
-  table.query(doc, callback);
+  table.query(doc[, options], callback);
   // or
-  table.delete(doc, callback);
+  table.delete(doc[, options], callback);
   // or
-  table.update(doc, update, callback);
+  table.update(doc, update[, options], callback);
 });
 
 ```
@@ -70,9 +70,15 @@ a document you are updating. In this case, you can do something like this:
 ```javascript
 db.table('Your-Table-Name', function(err, table) {
 
+  // The following settings will affect all queries done with this
+  // EnergyTable instance.
   table.returnConsumedCapacity().returnOldValues();
 
   // perform your queries...
+
+  // Another option is to pass an additional 'options' object
+  // to the method. This will affect only the query in question.
+  table.query(doc, {ConsistentRead: true}, callback);
 
 });
 
@@ -94,10 +100,19 @@ pull-request. Only PR's with tests will be considered.
 
 ## Releases
 
+* 0.0.6:
+
+  * Improves code organization
+  * Adds the 'options' as an optional argument when performing queries
+  * Adds support to return values as plain js object to the update method
+  * Some clean up
+
+
 * 0.0.5:
 
   * adds final validation to the query factory to prevent invalid syntax and
     the use of deprecated operators
+
 
 * 0.0.4:
 
