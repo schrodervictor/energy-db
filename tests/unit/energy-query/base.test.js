@@ -14,7 +14,7 @@ describe('BaseQueryBuilder', function() {
           TableName: 'Table-Name-Here',
         };
         builder.configure({
-          queryBase: queryBase,
+          base: queryBase,
           hashKey: 'hash-key'
         });
 
@@ -47,7 +47,7 @@ describe('BaseQueryBuilder', function() {
         };
 
         builder.configure({
-          queryBase: queryBase,
+          base: queryBase,
           options: options,
           hashKey: 'hash-key'
         });
