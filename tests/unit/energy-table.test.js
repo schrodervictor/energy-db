@@ -773,26 +773,22 @@ describe('EnergyTable (class)', function() {
             'some-range-key': {S: 'some-value-1'}
           },
           ExpressionAttributeNames: {
-            '#k0': 'some-hash-key',
-            '#k1': 'some-range-key',
-            '#k2': 'some-key-2',
-            '#k3': 'some-key-2',
-            '#k4': 'some-key-0',
-            '#k5': 'some-key-1',
-            '#k6': 'some-key-3',
+            '#k0': 'some-key-2',
+            '#k1': 'some-key-2',
+            '#k2': 'some-key-0',
+            '#k3': 'some-key-1',
+            '#k4': 'some-key-3',
           },
           ExpressionAttributeValues: {
-            ':v0': {S: 'some-value-0'},
-            ':v1': {S: 'some-value-1'},
-            ':v2': {N: '11111'},
-            ':v3': {N: '33333'},
-            ':v4': {S: 'some-value-new'},
-            ':v5': {N: '11111'},
+            ':v0': {N: '11111'},
+            ':v1': {N: '33333'},
+            ':v2': {S: 'some-value-new'},
+            ':v3': {N: '11111'},
           },
           ConditionExpression:
-            '#k0 = :v0 AND #k1 = :v1 AND #k2 = :v2',
+            '#k0 = :v0',
           UpdateExpression:
-            'ADD #k3 :v3 SET #k4 = :v4, #k5 = :v5 REMOVE #k6'
+            'ADD #k1 :v1 SET #k2 = :v2, #k3 = :v3 REMOVE #k4'
         };
 
         sinon.spy(mocks.connectorMock, 'updateItem');
@@ -897,21 +893,17 @@ describe('EnergyTable (class)', function() {
             'some-range-key': {S: 'some-value-1'}
           },
           ExpressionAttributeNames: {
-            '#k0': 'some-hash-key',
-            '#k1': 'some-range-key',
-            '#k2': 'some-key-2',
-            '#k3': 'some-key-2',
+            '#k0': 'some-key-2',
+            '#k1': 'some-key-2',
           },
           ExpressionAttributeValues: {
-            ':v0': {S: 'some-value-0'},
-            ':v1': {S: 'some-value-1'},
-            ':v2': {N: '11111'},
-            ':v3': {N: '33333'},
+            ':v0': {N: '11111'},
+            ':v1': {N: '33333'},
           },
           ConditionExpression:
-            '#k0 = :v0 AND #k1 = :v1 AND #k2 = :v2',
+            '#k0 = :v0',
           UpdateExpression:
-            'ADD #k3 :v3',
+            'ADD #k1 :v1',
           ReturnValues: 'ALL_OLD'
         };
 
@@ -972,13 +964,6 @@ describe('EnergyTable (class)', function() {
         Key: {
           'some-hash-key': {S: 'some-value'}
         },
-        ExpressionAttributeNames: {
-          '#k0': 'some-hash-key',
-        },
-        ExpressionAttributeValues: {
-          ':v0': {S: 'some-value'},
-        },
-        ConditionExpression: '#k0 = :v0'
       };
 
       sinon.spy(mocks.connectorMock, 'deleteItem');

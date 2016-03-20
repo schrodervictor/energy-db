@@ -382,21 +382,17 @@ describe('EnergyQueryFactory (class)', function() {
           'some-range-key': {S: 'value-1'},
         },
         ExpressionAttributeNames: {
-          '#k0': 'some-hash-key',
-          '#k1': 'some-range-key',
-          '#k2': 'key-2',
-          '#k3': 'key-3'
+          '#k0': 'key-2',
+          '#k1': 'key-3'
         },
         ExpressionAttributeValues: {
-          ':v0': {S: 'value-0'},
-          ':v1': {S: 'value-1'},
-          ':v2': {N: '12345'},
-          ':v3': {M: {
+          ':v0': {N: '12345'},
+          ':v1': {M: {
             'sub-key': {S: 'random-value'}
           }}
         },
         ConditionExpression:
-          '#k0 = :v0 AND #k1 = :v1 AND #k2 >= :v2 AND #k3 = :v3'
+          '#k0 >= :v0 AND #k1 = :v1'
       };
 
       var instance = new EnergyQueryFactory(tableHashAndRange);
@@ -511,30 +507,26 @@ describe('EnergyQueryFactory (class)', function() {
           'some-range-key': {S: 'value-1'},
         },
         ExpressionAttributeNames: {
-          '#k0': 'some-hash-key',
-          '#k1': 'some-range-key',
-          '#k2': 'key-0',
-          '#k3': 'key-1',
-          '#k4': 'key-2',
-          '#k5': 'key-0',
-          '#k6': 'key-1',
-          '#k7': 'key-2',
-          '#k8': 'key-3',
+          '#k0': 'key-0',
+          '#k1': 'key-1',
+          '#k2': 'key-2',
+          '#k3': 'key-0',
+          '#k4': 'key-1',
+          '#k5': 'key-2',
+          '#k6': 'key-3',
         },
         ExpressionAttributeValues: {
-          ':v0': {S: 'value-0'},
-          ':v1': {S: 'value-1'},
-          ':v2': {S: 'value-2'},
-          ':v3': {N: '98765'},
-          ':v4': {N: '12345'},
-          ':v5': {S: 'value-0-new'},
-          ':v6': {N: '11111'},
-          ':v7': {N: '3'},
+          ':v0': {S: 'value-2'},
+          ':v1': {N: '98765'},
+          ':v2': {N: '12345'},
+          ':v3': {S: 'value-0-new'},
+          ':v4': {N: '11111'},
+          ':v5': {N: '3'},
         },
         ConditionExpression:
-          '#k0 = :v0 AND #k1 = :v1 AND #k2 = :v2 AND #k3 = :v3 AND #k4 = :v4',
+          '#k0 = :v0 AND #k1 = :v1 AND #k2 = :v2',
         UpdateExpression:
-          'SET #k5 = :v5, #k6 = :v6 ADD #k7 :v7 REMOVE #k8'
+          'SET #k3 = :v3, #k4 = :v4 ADD #k5 :v5 REMOVE #k6'
       };
 
       var instance = new EnergyQueryFactory(tableHashAndRange);
