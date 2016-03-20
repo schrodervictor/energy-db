@@ -100,6 +100,14 @@ pull-request. Only PR's with tests will be considered.
 
 ## Releases
 
+* 0.0.7:
+
+  * Adds additional checks to prevent update/delete errors (removes the double
+    reference to hash and range key in the `ConditionExpression`)
+  * Adds additional check to prevent empty expressions, attribute names and
+    attribute values
+
+
 * 0.0.6:
 
   * Improves code organization
