@@ -38,7 +38,7 @@
   "dependencies": {
     "aws-sdk": "^2.2.0",
     "dynamo-doc": "^0.1.1",
-    "node-uuid": "^1.4.3"
+    "uuid": "^3.0.0"
   },
   "devDependencies": {
     "chai": "^3.2.0",
